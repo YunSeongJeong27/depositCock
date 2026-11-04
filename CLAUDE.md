@@ -14,7 +14,7 @@
 - "내 맥북"(사용자 PC)과 "Claude 클라우드 서버"(AI 작업 환경)를 구분해서 말한다.
 - 사용자가 시키기 전에는 코드를 작성하지 않는다. 현재 단계·진행 상태는 docs/design.md "구현 결정"·"작업 흐름" 참고.
 - 실행·테스트 방법은 README.md. 백엔드 `cd backend && ./mvnw test`, 프론트 `cd frontend && npm run typecheck`.
-- `main`에 직접 push하지 않는다. 작업 브랜치 → PR → 사용자 머지.
+- `main`·`dev`에 직접 push하지 않는다. 최신 `dev`에서 작업 브랜치 → PR 대상은 `dev` → 사용자 머지. `main`은 사용자가 `dev`를 머지하고, 배포 뒤에는 운영 브랜치 (2026-11-04 사용자).
 - 비밀값(API 키 등)은 커밋하지 않는다.
 - 사용자가 금지한 기술은 없다. 문서에 기술 사용을 막는 규칙을 새로 적지 않고, 더 나은 기술·기능이 있으면 쓴다 (2026-10-20 사용자).
 - 문구: 서버 오류·입력값 검사는 `ErrorCode` (검사 어노테이션 message 에 enum 이름), 메일은 `MailText`, 화면 긴 문장은 `frontend/src/texts/` (docs/design.md "2026-10-20 문구 관리 방식").
