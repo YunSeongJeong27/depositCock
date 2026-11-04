@@ -1,5 +1,6 @@
 import { Link, Navigate } from 'react-router-dom'
 import { useAuth } from '../auth'
+import { Brand } from '../components/Ui'
 
 export default function Home() {
   const { me, loading } = useAuth()
@@ -7,7 +8,7 @@ export default function Home() {
   return (
     <div>
       <div className="hero">
-        <h1>📌 입금콕</h1>
+        <h1><Brand /></h1>
         <p>계좌 입금내역만 올리면 입금자 콕! 공구 장부 한 번에</p>
         <div className="row" style={{ justifyContent: 'center' }}>
           <Link className="btn primary" to="/signup">무료로 시작하기</Link>
