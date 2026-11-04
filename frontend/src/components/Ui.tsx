@@ -18,6 +18,15 @@ export function Rich({ text, strongStyle }: { text: string; strongStyle?: CSSPro
   )
 }
 
+/** 입금콕 로고 (그림 + 글자). 그림은 탭 아이콘과 같은 public/logo.svg, 크기는 글자 크기를 따른다 */
+export function Brand() {
+  return (
+    <span className="brand-logo">
+      <img src="/logo.svg" alt="" />입금<em>콕</em>
+    </span>
+  )
+}
+
 export function ErrorBox({ message }: { message: string | null | undefined }) {
   if (!message) return null
   return <div className="error-box" style={{ whiteSpace: 'pre-line' }}>{message}</div>

@@ -48,6 +48,9 @@ input[type=date].date-compact { width: 150px; padding: 8px; }
 .topbar nav a { color: var(--muted); }
 .topbar nav a.active { color: var(--text); font-weight: 700; }
 .brand { font-weight: 800; color: var(--text); font-size: 1.1rem; }
+.brand-logo { white-space: nowrap; }
+.brand-logo img { width: 1.3em; height: 1.3em; vertical-align: -0.28em; margin-right: 0.3em; }
+.brand-logo em { font-style: normal; color: var(--primary); }
 .footer { text-align: center; color: var(--muted); font-size: 0.85rem; padding: 24px 16px 40px; }
 
 .banner { padding: 10px 16px; font-size: 0.92rem; }
