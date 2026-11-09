@@ -139,6 +139,28 @@ class CancelRefundPauseTest extends IntegrationTest {
                 .andExpect(status().isBadRequest());
     }
 
+    /** 취소한 뒤 같은 번호·이름으로 다시 주문하면 경고 없이 새 주문으로 들어간다 (내 주문의 "다시 주문" 안내가 기대는 동작, 2026-11-09) */
+    @Test
+    void reorderAfterCancelIsNewOrder() throws Exception {
+        Opened g = open(false);
+        Cookie device = place(g, "010-8860-0001", "취소후");
+        mvc.perform(withJson(post(g.pub() + "/cancel").cookie(device), Map.of("phone", "01088600001", "depositorName", "취소후")))
+                .andExpect(status().isOk());
+
+        Map<String, Object> again = order(g, "010-8860-0001", "취소후");
+        again.put("acknowledgeWarnings", false);
+        mvc.perform(withJson(post(g.pub() + "/orders").cookie(device), again))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.orderNo").value(2))
+                .andExpect(jsonPath("$.changed").value(false));
+        mvc.perform(get(g.pub()).cookie(device))
+                .andExpect(jsonPath("$.myOrders.length()").value(2))
+                .andExpect(jsonPath("$.myOrders[0].orderNo").value(2))
+                .andExpect(jsonPath("$.myOrders[0].status").value("AWAITING_DEPOSIT"))
+                .andExpect(jsonPath("$.myOrders[1].orderNo").value(1))
+                .andExpect(jsonPath("$.myOrders[1].status").value("CANCELLED"));
+    }
+
     /**
      * 환불 신청 중인 주문은 판매자가 처리할 때까지 그대로: 같은 번호로 다시 주문하면 새 주문으로 쌓이고, 수정·바로 취소는 안 됨.
      * 판매자가 [주문 취소 후 환불 진행]하면 그 주문은 취소(환불 필요)로 남고 새 주문은 그대로 (2026-10-19)

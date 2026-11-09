@@ -176,6 +176,10 @@ function MyOrdersCard({ view, onEdit, onCancel }: {
           {confirmedOrder(o) && <div className="small muted mt">{T.confirmedCannotEdit}</div>}
         </div>
       ))}
+      {/* 취소한 주문이 있으면 다시 주문해도 된다는 안내 한 줄 (주문서가 열려 있을 때만, 2026-11-09) */}
+      {view.acceptingOrders && !view.paused && view.myOrders.some((o) => o.status === 'CANCELLED') && (
+        <div className="small muted" style={{ borderTop: '1px solid var(--line)', paddingTop: 10 }}>{T.reorderAfterCancel}</div>
+      )}
     </div>
   )
 }
