@@ -94,7 +94,7 @@ final class OrderRules {
         return quantities;
     }
 
-    /** 배송 정보. 배송이 아니면 Delivery.NONE. 주문자 성명·전화번호·주소(배송 칸) 중 하나라도 없으면 missingError */
+    /** 배송 정보. 배송이 아니면 Delivery.NONE. 수령인 이름·전화번호·주소 중 하나라도 없으면 missingError */
     static Delivery delivery(ReceiveMethod receive, DeliveryInput r, ErrorCode missingError) {
         if (receive != ReceiveMethod.DELIVERY) {
             return Delivery.NONE;

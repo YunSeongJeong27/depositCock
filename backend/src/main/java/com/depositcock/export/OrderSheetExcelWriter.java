@@ -77,7 +77,7 @@ public class OrderSheetExcelWriter {
         // 수령 방법·픽업 지점은 연락처가 아니므로 기본 정리표에도 넣는다 (픽업 지점별로 나눠 챙길 때 필요)
         headers.addAll(List.of("금액", "결제 방식", "입금 여부", "입금자명", "수령 방법", "픽업 지점", "수령", "확인필요", "주문 상태"));
         if (includeContact) {
-            headers.addAll(List.of("휴대폰", "동·호수", "주문자 성명", "주문자 전화번호", "우편번호", "주소", "상세주소"));
+            headers.addAll(List.of("휴대폰", "동·호수", "수령인", "수령인 전화번호", "우편번호", "주소", "상세주소"));
         }
         headers.add("주문 시각");
 

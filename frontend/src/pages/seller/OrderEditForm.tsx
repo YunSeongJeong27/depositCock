@@ -149,10 +149,10 @@ export default function OrderEditForm({ groupBuy, order, onSaved, onClose }: Pro
         )}
         {receive === 'DELIVERY' && (
           <>
-            <label className="field"><span>주문자 성명</span>
+            <label className="field"><span>수령인</span>
               <input type="text" value={form.recipientName} onChange={(e) => set('recipientName', e.target.value)} />
             </label>
-            <label className="field"><span>주문자 전화번호</span>
+            <label className="field"><span>수령인 전화번호</span>
               <input type="tel" value={form.recipientPhone} onChange={(e) => set('recipientPhone', e.target.value)} />
             </label>
             <label className="field"><span>우편번호</span>
