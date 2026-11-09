@@ -530,8 +530,8 @@ export default function PublicOrder() {
 
           {receive === 'DELIVERY' && (
             <div className="mt">
-              <label className="field"><span>받는 분 *</span><input type="text" value={form.recipientName} onChange={(e) => set('recipientName', e.target.value)} required /></label>
-              <label className="field"><span>받는 분 연락처 *</span><input type="tel" value={form.recipientPhone} onChange={(e) => set('recipientPhone', e.target.value)} required placeholder="010-0000-0000" /></label>
+              <label className="field"><span>주문자 성명 *</span><input type="text" value={form.recipientName} onChange={(e) => set('recipientName', e.target.value)} required /></label>
+              <label className="field"><span>주문자 전화번호 *</span><input type="tel" value={form.recipientPhone} onChange={(e) => set('recipientPhone', e.target.value)} required placeholder="010-0000-0000" /></label>
               <div className="field"><span style={{ fontWeight: 600, display: 'block', marginBottom: 4 }}>주소 *</span>
                 <div className="row">
                   <input type="text" value={form.zipcode} readOnly placeholder="우편번호" style={{ width: 110 }} />
