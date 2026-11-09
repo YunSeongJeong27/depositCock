@@ -53,6 +53,7 @@ public enum ErrorCode {
     ADMIN_CANNOT_DELETE(BAD_REQUEST, "관리자 계정은 삭제할 수 없습니다."),
     ADMIN_CANNOT_WITHDRAW(BAD_REQUEST, "관리자 계정은 탈퇴할 수 없습니다."),
     ADMIN_EMAIL_FIXED(BAD_REQUEST, "관리자 계정 이메일은 여기서 바꿀 수 없습니다. 서버 설정 APP_ADMIN_EMAIL 로 정합니다."),
+    DEPOSIT_CAPTURE_CLOSED(FORBIDDEN, "은행앱 화면 캡처로 올리기는 지금 쓸 수 없습니다. 거래내역 파일로 올려 주세요."),
     COMMENT_FEATURE_CLOSED(FORBIDDEN, "댓글 주문 기능은 아직 열려 있지 않습니다. 주문 링크로 주문을 받아 주세요."),
 
     // ---- 공구 설정 ----
@@ -152,6 +153,8 @@ public enum ErrorCode {
     // ---- 입금 대조 ----
     STATEMENT_HEADER_MISMATCH(BAD_REQUEST, "거래내역 헤더 설정이 잘못됐습니다. [입금 대조 은행 설정] 메뉴에서 '%s'의 헤더(컬럼)명을 파일에 맞게 고친 뒤 다시 올려 주세요. 파일에서 못 찾은 헤더(컬럼)명: %s"),
     STATEMENT_PDF_NO_TEXT(BAD_REQUEST, "글자를 읽을 수 없는 PDF입니다. 글자가 그림으로 된 PDF는 읽지 못합니다. 은행 앱 화면 캡처로 올리거나 엑셀로 받아 올려 주세요."),
+    /** 관리자가 화면 캡처로 올리기를 꺼 둔 때의 같은 안내 (캡처를 권하지 않음, 2026-11-09) */
+    STATEMENT_PDF_NO_TEXT_FILE_ONLY(BAD_REQUEST, "글자를 읽을 수 없는 PDF입니다. 글자가 그림으로 된 PDF는 읽지 못합니다. 엑셀로 받아 올려 주세요."),
     // 암호 걸린 PDF·엑셀: 올리기 화면의 파일 비밀번호로 연다 (2026-10-27 사용자 요청)
     STATEMENT_FILE_PASSWORD_REQUIRED(BAD_REQUEST, "암호가 걸린 파일입니다. 파일 비밀번호를 입력하고 다시 올려 주세요."),
     STATEMENT_FILE_PASSWORD_WRONG(BAD_REQUEST, "파일 비밀번호가 맞지 않습니다. 다시 확인해 주세요."),

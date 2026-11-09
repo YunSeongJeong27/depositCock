@@ -46,6 +46,8 @@ public abstract class IntegrationTest {
         setCommentFeatureOpen(true);
         // 회원가입 받기는 처음 값(받음)으로. 끈 상태는 SignupOpenTest 가 직접 바꿔서 확인한다 (2026-11-09)
         settingsJdbc.update("delete from app_setting where setting_key = 'signup_open'");
+        // 은행앱 화면 캡처로 올리기도 처음 값(씀)으로. 끈 상태는 DepositCaptureAccessTest 가 확인한다 (2026-11-09)
+        settingsJdbc.update("delete from app_setting where setting_key = 'deposit_capture_open'");
     }
 
     protected void setCommentFeatureOpen(boolean open) {

@@ -34,10 +34,10 @@ public class AdminController {
 
     @GetMapping("/api/admin/settings")
     public AdminSettings settings() {
-        return new AdminSettings(featureAccess.commentFeatureOpen(), featureAccess.signupOpen());
+        return new AdminSettings(featureAccess.commentFeatureOpen(), featureAccess.signupOpen(), featureAccess.depositCaptureOpen());
     }
 
-    /** 댓글 주문 기능 전체 공개, 새 회원가입 받기 켜기/끄기 */
+    /** 댓글 주문 기능 전체 공개, 새 회원가입 받기, 은행앱 화면 캡처로 올리기 켜기/끄기 */
     @PutMapping("/api/admin/settings")
     public AdminSettings updateSettings(@RequestBody AdminSettings request) {
         LocalDateTime now = LocalDateTime.now(clock);
@@ -46,6 +46,9 @@ public class AdminController {
         }
         if (request.signupOpen() != null) {
             featureAccess.setSignupOpen(request.signupOpen(), now);
+        }
+        if (request.depositCaptureOpen() != null) {
+            featureAccess.setDepositCaptureOpen(request.depositCaptureOpen(), now);
         }
         return settings();
     }

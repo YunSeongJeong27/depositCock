@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { api, ApiError, dateTime, errorMessage, won } from '../../api'
+import { useAuth } from '../../auth'
 import { ErrorBox, StatusBadge } from '../../components/Ui'
 import { depositText as T } from '../../texts/deposit'
 import { STATEMENT_TYPE_LABEL, type BankHeaderView, type GroupBuy, type MatchResponse, type MatchRow, type OrderBrief, type PreviewResponse, type StatementType, type UploadResponse, type UploadSummary } from '../../types'
@@ -10,7 +11,7 @@ import TossFileGuide from './TossFileGuide'
 interface Props { groupBuy: GroupBuy; reload: () => void }
 
 /** 거래내역을 올릴 때 알림창으로도 띄우는 서버 오류 */
-const ALERT_CODES = ['STATEMENT_HEADER_MISMATCH', 'STATEMENT_BANK_TYPE_MISSING', 'STATEMENT_PDF_NO_TEXT', 'STATEMENT_FILE_PASSWORD_REQUIRED', 'STATEMENT_FILE_PASSWORD_WRONG']
+const ALERT_CODES = ['STATEMENT_HEADER_MISMATCH', 'STATEMENT_BANK_TYPE_MISSING', 'STATEMENT_PDF_NO_TEXT', 'STATEMENT_PDF_NO_TEXT_FILE_ONLY', 'STATEMENT_FILE_PASSWORD_REQUIRED', 'STATEMENT_FILE_PASSWORD_WRONG']
 
 /** 고른 파일의 종류: .pdf 면 PDF, 나머지는 엑셀 (CSV 도 엑셀로 본다) */
 function typeOf(file: File | null): StatementType {
@@ -24,6 +25,7 @@ function orderLabel(o: OrderBrief, groupBuyId: number) {
 }
 
 export default function DepositTab({ groupBuy, reload }: Props) {
+  const { me } = useAuth()
   const [file, setFile] = useState<File | null>(null)
   const [banks, setBanks] = useState<BankHeaderView[]>([])
   const [bankName, setBankName] = useState('')
@@ -253,7 +255,8 @@ export default function DepositTab({ groupBuy, reload }: Props) {
         )}
       </div>
 
-      <ScreenshotDeposits groupBuy={groupBuy} onSaved={loadMatch} />
+      {/* 관리자가 "은행앱 화면 캡처로 올리기"를 끄면 숨긴다 (2026-11-09, 서버도 막음) */}
+      {me?.depositCaptureEnabled !== false && <ScreenshotDeposits groupBuy={groupBuy} onSaved={loadMatch} />}
 
       <ErrorBox message={error} />
       {notice && <div className="success-box">{notice}</div>}
