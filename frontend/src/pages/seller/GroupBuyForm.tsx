@@ -155,7 +155,7 @@ export default function GroupBuyForm() {
           <input type="text" value={form.title} onChange={(e) => set('title', e.target.value)} required placeholder="예: 동해기정떡 2차 (10/15 입고)" />
         </label>
         <label className="field"><span>설명</span>
-          <textarea value={form.description} onChange={(e) => set('description', e.target.value)} placeholder="픽업 날짜·시간, 상품 설명 등" />
+          <textarea value={form.description} onChange={(e) => set('description', e.target.value)} />
         </label>
         <label className="field"><span>주문 마감 일시</span>
           <input type="datetime-local" value={form.closeAt} onChange={(e) => set('closeAt', e.target.value)} />
