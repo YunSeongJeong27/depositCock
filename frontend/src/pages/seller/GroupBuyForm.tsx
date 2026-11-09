@@ -201,6 +201,7 @@ export default function GroupBuyForm() {
 
       <div className="card">
         <h3>수령 방법</h3>
+        <p className="muted small">{T.receiveHint}</p>
         <label className="check"><input type="checkbox" checked={form.pickupEnabled} onChange={(e) => set('pickupEnabled', e.target.checked)} /> 픽업</label>
         {form.pickupEnabled && (
           <div style={{ marginLeft: 26 }}>
