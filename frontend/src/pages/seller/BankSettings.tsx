@@ -131,7 +131,7 @@ export default function BankSettings() {
               {form.adding && (
                 <>
                   <label className="field"><span>은행 이름 *</span>
-                    <input type="text" list="bank-names" value={form.bankName} onChange={set('bankName')} required placeholder="예: 신협" />
+                    <input type="text" list="bank-names" value={form.bankName} onChange={set('bankName')} required />
                     <datalist id="bank-names">{bankNames.map((n) => <option key={n} value={n} />)}</datalist>
                   </label>
                   <label className="field"><span>파일 종류 *</span>

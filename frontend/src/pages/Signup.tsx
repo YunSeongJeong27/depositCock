@@ -45,7 +45,7 @@ export default function Signup() {
           <input type="password" minLength={8} value={form.password} onChange={(e) => setForm({ ...form, password: e.target.value })} required />
         </label>
         <label className="field"><span>판매자 이름</span>
-          <input type="text" value={form.displayName} onChange={(e) => setForm({ ...form, displayName: e.target.value })} required placeholder="예: 달콤 과일가게" />
+          <input type="text" value={form.displayName} onChange={(e) => setForm({ ...form, displayName: e.target.value })} required />
           <span className="muted small" style={{ fontWeight: 400 }}>{T.displayNameHint}</span>
         </label>
         <label className="check">

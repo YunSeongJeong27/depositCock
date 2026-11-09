@@ -553,7 +553,7 @@ export default function PublicOrder() {
                 : <span className="small" style={{ color: 'var(--danger)' }}>{T.depositorHintTransfer}</span>}
             </label>
             <label className="field"><span>{view.nicknameRequired ? '닉네임 *' : '닉네임 (선택)'}</span><input type="text" value={form.nickname} onChange={(e) => set('nickname', e.target.value)} required={view.nicknameRequired} /></label>
-            {view.unitAddressFieldEnabled && <label className="field"><span>동·호수 *</span><input type="text" value={form.unitAddress} onChange={(e) => set('unitAddress', e.target.value)} required placeholder="예: 101동 1203호" /></label>}
+            {view.unitAddressFieldEnabled && <label className="field"><span>동·호수 *</span><input type="text" value={form.unitAddress} onChange={(e) => set('unitAddress', e.target.value)} required /></label>}
           </div>
 
           <div className="card" style={{ background: '#f9fafb' }}>
@@ -638,8 +638,8 @@ export default function PublicOrder() {
             <label className="field"><span>주문할 때 적은 입금자명</span><input type="text" value={cancel.depositorName} onChange={(e) => setCancel({ ...cancel, depositorName: e.target.value, choices: [] })} required /></label>
             {cancel.mode === 'refund' && (
               <>
-                <label className="field"><span>환불받을 은행</span><input type="text" value={cancel.bankName} onChange={(e) => setCancel({ ...cancel, bankName: e.target.value })} required maxLength={30} placeholder="예: 국민은행" /></label>
-                <label className="field"><span>계좌번호</span><input type="text" inputMode="numeric" value={cancel.accountNumber} onChange={(e) => setCancel({ ...cancel, accountNumber: e.target.value })} required maxLength={30} placeholder="예: 123-456-789012" /></label>
+                <label className="field"><span>환불받을 은행</span><input type="text" value={cancel.bankName} onChange={(e) => setCancel({ ...cancel, bankName: e.target.value })} required maxLength={30} /></label>
+                <label className="field"><span>계좌번호</span><input type="text" inputMode="numeric" value={cancel.accountNumber} onChange={(e) => setCancel({ ...cancel, accountNumber: e.target.value })} required maxLength={30} /></label>
               </>
             )}
             {cancelTarget && cancel.choices.length === 0 && (
