@@ -150,7 +150,7 @@ public enum ErrorCode {
     DELETE_ONLY_FINISHED(BAD_REQUEST, "완료된 주문만 지울 수 있습니다. 아직 처리 중인 주문: %s"),
 
     // ---- 입금 대조 ----
-    STATEMENT_HEADER_MISMATCH(BAD_REQUEST, "거래내역 헤더 설정이 잘못됐습니다. [은행 헤더(컬럼) 설정] 메뉴에서 '%s'의 헤더(컬럼)명을 파일에 맞게 고친 뒤 다시 올려 주세요. 파일에서 못 찾은 헤더(컬럼)명: %s"),
+    STATEMENT_HEADER_MISMATCH(BAD_REQUEST, "거래내역 헤더 설정이 잘못됐습니다. [입금 대조 은행 설정] 메뉴에서 '%s'의 헤더(컬럼)명을 파일에 맞게 고친 뒤 다시 올려 주세요. 파일에서 못 찾은 헤더(컬럼)명: %s"),
     STATEMENT_PDF_NO_TEXT(BAD_REQUEST, "글자를 읽을 수 없는 PDF입니다. 글자가 그림으로 된 PDF는 읽지 못합니다. 은행 앱 화면 캡처로 올리거나 엑셀로 받아 올려 주세요."),
     // 암호 걸린 PDF·엑셀: 올리기 화면의 파일 비밀번호로 연다 (2026-10-27 사용자 요청)
     STATEMENT_FILE_PASSWORD_REQUIRED(BAD_REQUEST, "암호가 걸린 파일입니다. 파일 비밀번호를 입력하고 다시 올려 주세요."),
@@ -176,7 +176,7 @@ public enum ErrorCode {
     REFUNDED_CANNOT_UNCONFIRM(BAD_REQUEST, "환불 완료된 주문은 입금 확정을 취소할 수 없습니다."),
     ALIAS_NOT_FOUND(NOT_FOUND, "별칭을 찾을 수 없습니다."),
     BANK_HEADER_NOT_FOUND(NOT_FOUND, "은행 헤더(컬럼) 설정을 찾을 수 없습니다."),
-    STATEMENT_BANK_TYPE_MISSING(BAD_REQUEST, "'%s' %s 헤더(컬럼)명이 아직 없습니다. [은행 헤더(컬럼) 설정]에서 추가한 뒤 다시 올려 주세요."),
+    STATEMENT_BANK_TYPE_MISSING(BAD_REQUEST, "'%s' %s 헤더(컬럼)명이 아직 없습니다. [입금 대조 은행 설정]에서 추가한 뒤 다시 올려 주세요."),
     FILE_TYPE_REQUIRED(BAD_REQUEST, "파일 종류를 골라 주세요."),
 
     // ---- 댓글 집계 ----

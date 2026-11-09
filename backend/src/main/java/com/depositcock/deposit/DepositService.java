@@ -594,7 +594,7 @@ public class DepositService {
 
     // ---------- 은행 헤더(컬럼) 설정 ----------
 
-    /** 은행 헤더(컬럼) 설정 화면: 은행별 헤더(컬럼)명 + 입금자 별칭 */
+    /** 입금 대조 은행 설정 화면: 은행별 헤더(컬럼)명 + 입금자 별칭 */
     public BankSettingsResponse bankSettings(Long sellerId) {
         return new BankSettingsResponse(bankHeaders.list(sellerId), aliases(sellerId));
     }

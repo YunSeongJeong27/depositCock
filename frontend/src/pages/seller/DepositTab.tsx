@@ -211,7 +211,7 @@ export default function DepositTab({ groupBuy, reload }: Props) {
             </label>
           </div>
           {!bank && bankName && (
-            <div className="warn-box small">{T.bankTypeMissing(bankName, STATEMENT_TYPE_LABEL[fileType])} <Link to="/seller/bank">은행 헤더(컬럼) 설정</Link></div>
+            <div className="warn-box small">{T.bankTypeMissing(bankName, STATEMENT_TYPE_LABEL[fileType])} <Link to="/seller/bank">입금 대조 은행 설정</Link></div>
           )}
           {bank && (
             <div className="small">
@@ -220,7 +220,7 @@ export default function DepositTab({ groupBuy, reload }: Props) {
               <span className="chip">거래일시: {bank.values.dateColumn}</span>
               {bank.values.accountLabel && <span className="chip">계좌번호: {bank.values.accountLabel}</span>}
               {bank.values.typeColumn && <span className="chip">거래 구분: {bank.values.typeColumn}</span>}
-              <Link to="/seller/bank" className="small" style={{ marginLeft: 8 }}>은행 헤더(컬럼) 설정</Link>
+              <Link to="/seller/bank" className="small" style={{ marginLeft: 8 }}>입금 대조 은행 설정</Link>
             </div>
           )}
         </div>
