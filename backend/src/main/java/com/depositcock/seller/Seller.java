@@ -35,15 +35,22 @@ public class Seller extends BaseTimeEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    /** 관리자가 [정보 수정]으로 바꿀 수 있음 (2026-11-09). 로그인 토큰에는 id 만 들어가서 바꿔도 로그인은 그대로 */
+    @Setter
     @Column(nullable = false, unique = true)
     private String email;
 
+    @Setter
     @Column(nullable = false)
     private String passwordHash;
 
     @Setter
     @Column(nullable = false)
     private String displayName;
+
+    /** 휴대폰 번호, 숫자만 (2026-11-09). 관리자가 연락할 때 씀. 인증은 안 함. 이 칸이 생기기 전 가입자는 null */
+    @Setter
+    private String phone;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)

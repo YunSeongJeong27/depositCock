@@ -6,6 +6,7 @@ export const accountText = {
   loginExpired: '로그인이 만료되었습니다. 다시 로그인해 주세요.',
   agreeRequired: '이용약관과 개인정보처리방침에 동의해 주세요.',
   displayNameHint: '고객 화면에 보이는 이름입니다.',
+  sellerPhoneHint: '입금콕 운영자가 연락할 때만 씁니다.',
   signupClosed: `관리자가 잠시 회원가입을 비활성화 했습니다. ${SUPPORT_EMAIL} 으로 문의해주시면 바로 안내해드리겠습니다.`,
 
   // 내 정보
@@ -26,6 +27,11 @@ export const accountText = {
   commentOpenAll: '모든 판매자에게 열려 있습니다.',
   commentClosed: '닫혀 있습니다. 아래 표에서 "댓글 기능"을 체크한 판매자만 씁니다. 주문 링크·입금 대조는 상관없이 씁니다.',
   commentFeatureTitle: '전체 공개가 꺼져 있을 때 이 판매자만 댓글 주문 기능을 쓰게 함',
+  createSellerHelp: '메일 등으로 요청받은 판매자 계정을 만듭니다. 회원가입을 꺼 둬도 만들 수 있습니다. 만든 뒤 이메일과 비밀번호를 판매자에게 알려 주세요.',
+  editSellerHelp: '새 비밀번호는 바꿀 때만 적으세요. 이메일이나 비밀번호를 바꾸면 판매자는 다음 로그인부터 새 값으로 로그인합니다.',
+  adminEmailFixed: '관리자 계정 이메일은 서버 설정 APP_ADMIN_EMAIL 로 정해서 여기서 바꿀 수 없습니다.',
+  sellerCreated: '계정을 만들었습니다. 이메일과 비밀번호를 판매자에게 알려 주세요.',
+  sellerInfoSaved: '판매자 정보를 저장했습니다. 비밀번호를 바꿨다면 판매자에게 새 비밀번호를 알려 주세요.',
   signupOpenNow: '새 판매자가 회원가입할 수 있습니다.',
   signupClosedNow: '새 판매자가 회원가입할 수 없습니다. 첫 화면·로그인·회원가입 화면의 가입 버튼이 꺼집니다. 이미 가입한 판매자는 그대로 씁니다.',
   confirmSignupOpen: '새 판매자 회원가입을 다시 받습니다. 계속할까요?',

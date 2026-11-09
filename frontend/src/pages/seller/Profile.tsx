@@ -23,7 +23,7 @@ const SCREEN_ITEMS: { type: NotificationType; label: string; note: string }[] = 
 
 export default function Profile() {
   const { me, setMe } = useAuth()
-  const [form, setForm] = useState({ displayName: '', defaultBankName: '', defaultAccountNumber: '', defaultAccountHolder: '' })
+  const [form, setForm] = useState({ displayName: '', phone: '', defaultBankName: '', defaultAccountNumber: '', defaultAccountHolder: '' })
   const [error, setError] = useState<string | null>(null)
   const [saved, setSaved] = useState(false)
   const [notifyError, setNotifyError] = useState<string | null>(null)
@@ -63,7 +63,7 @@ export default function Profile() {
   const meId = me?.id
   useEffect(() => {
     if (me) {
-      setForm({ displayName: me.displayName, defaultBankName: me.defaultBankName ?? '', defaultAccountNumber: me.defaultAccountNumber ?? '', defaultAccountHolder: me.defaultAccountHolder ?? '' })
+      setForm({ displayName: me.displayName, phone: me.phone ?? '', defaultBankName: me.defaultBankName ?? '', defaultAccountNumber: me.defaultAccountNumber ?? '', defaultAccountHolder: me.defaultAccountHolder ?? '' })
     }
   }, [meId])
 
@@ -93,6 +93,10 @@ export default function Profile() {
       <form className="card" onSubmit={submit}>
         <label className="field"><span>판매자 이름</span>
           <input type="text" value={form.displayName} onChange={(e) => setForm({ ...form, displayName: e.target.value })} required />
+        </label>
+        <label className="field"><span>휴대폰 번호</span>
+          <input type="tel" value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} placeholder="010-0000-0000" />
+          <span className="muted small" style={{ fontWeight: 400 }}>{T.sellerPhoneHint}</span>
         </label>
         <h3>기본 입금 계좌</h3>
         <p className="muted small">{T.defaultAccountHint}</p>

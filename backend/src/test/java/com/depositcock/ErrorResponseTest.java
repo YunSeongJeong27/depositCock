@@ -32,7 +32,7 @@ class ErrorResponseTest extends IntegrationTest {
 
     @Test
     void oneValidationErrorAnswersWithItsCode() throws Exception {
-        mvc.perform(withJson(post("/api/auth/signup"), Map.of("email", uniqueEmail(), "password", "short", "displayName", "공구장")))
+        mvc.perform(withJson(post("/api/auth/signup"), Map.of("email", uniqueEmail(), "password", "short", "displayName", "공구장", "phone", "010-1234-5678")))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.code").value("PASSWORD_LENGTH"))
                 .andExpect(jsonPath("$.detail").value(ErrorCode.PASSWORD_LENGTH.message()));
@@ -40,7 +40,7 @@ class ErrorResponseTest extends IntegrationTest {
 
     @Test
     void severalValidationErrorsAreJoinedWithoutFieldNames() throws Exception {
-        mvc.perform(withJson(post("/api/auth/signup"), Map.of("email", uniqueEmail(), "password", "short", "displayName", "")))
+        mvc.perform(withJson(post("/api/auth/signup"), Map.of("email", uniqueEmail(), "password", "short", "displayName", "", "phone", "010-1234-5678")))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.code").value("INVALID_INPUT"))
                 .andExpect(jsonPath("$.detail").value(allOf(containsString(ErrorCode.PASSWORD_LENGTH.message()),
