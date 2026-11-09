@@ -5,6 +5,8 @@ export interface Me {
   id: number
   email: string
   displayName: string
+  /** 휴대폰 번호 010-1234-5678 모양. 이 칸이 생기기 전 가입자는 null (2026-11-09) */
+  phone: string | null
   role: Role
   plan: Plan
   trialEndsAt: string

@@ -48,7 +48,7 @@ class M1AuthAndTenantTest extends IntegrationTest {
         String email = uniqueEmail();
         signup(email);
         mvc.perform(withJson(post("/api/auth/signup"),
-                        Map.of("email", email.toUpperCase(), "password", "password123", "displayName", "x")))
+                        Map.of("email", email.toUpperCase(), "password", "password123", "displayName", "x", "phone", "010-1234-5678")))
                 .andExpect(status().isConflict());
     }
 

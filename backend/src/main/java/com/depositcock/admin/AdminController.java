@@ -8,12 +8,15 @@ import java.time.LocalDateTime;
 import com.depositcock.admin.AdminDtos.AdminSellerRow;
 import com.depositcock.admin.AdminDtos.AdminSettings;
 import com.depositcock.admin.AdminDtos.AdminUpdateRequest;
+import com.depositcock.admin.AdminDtos.SellerInfoRequest;
 import com.depositcock.seller.FeatureAccess;
+import com.depositcock.seller.SellerDtos.SignupRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
@@ -52,9 +55,21 @@ public class AdminController {
         return adminService.listSellers();
     }
 
+    /** 판매자 계정 직접 만들기 (2026-11-09) */
+    @PostMapping("/api/admin/sellers")
+    public void create(@Valid @RequestBody SignupRequest request) {
+        adminService.createSeller(request);
+    }
+
     @PutMapping("/api/admin/sellers/{sellerId}")
     public void update(@PathVariable Long sellerId, @Valid @RequestBody AdminUpdateRequest request) {
         adminService.updateSeller(sellerId, request);
+    }
+
+    /** 판매자 정보 고치기: 이메일·판매자 이름·휴대폰·새 비밀번호 (2026-11-09) */
+    @PutMapping("/api/admin/sellers/{sellerId}/info")
+    public void updateInfo(@PathVariable Long sellerId, @Valid @RequestBody SellerInfoRequest request) {
+        adminService.updateSellerInfo(sellerId, request);
     }
 
     @DeleteMapping("/api/admin/sellers/{sellerId}")

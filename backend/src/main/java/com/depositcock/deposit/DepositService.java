@@ -47,7 +47,7 @@ import com.depositcock.order.CustomerOrderRepository;
 import com.depositcock.order.DepositConfirmation;
 import com.depositcock.order.DepositConfirmationRepository;
 import com.depositcock.order.OrderSource;
-import com.depositcock.order.PhoneNumbers;
+import com.depositcock.common.PhoneNumbers;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

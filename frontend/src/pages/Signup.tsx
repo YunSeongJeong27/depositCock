@@ -10,7 +10,7 @@ export default function Signup() {
   const { setMe } = useAuth()
   const signupOpen = useSignupOpen()
   const navigate = useNavigate()
-  const [form, setForm] = useState({ email: '', password: '', displayName: '' })
+  const [form, setForm] = useState({ email: '', password: '', displayName: '', phone: '' })
   const [agree, setAgree] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [busy, setBusy] = useState(false)
@@ -48,6 +48,10 @@ export default function Signup() {
         <label className="field"><span>판매자 이름</span>
           <input type="text" value={form.displayName} onChange={(e) => setForm({ ...form, displayName: e.target.value })} required />
           <span className="muted small" style={{ fontWeight: 400 }}>{T.displayNameHint}</span>
+        </label>
+        <label className="field"><span>휴대폰 번호</span>
+          <input type="tel" value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} required placeholder="010-0000-0000" />
+          <span className="muted small" style={{ fontWeight: 400 }}>{T.sellerPhoneHint}</span>
         </label>
         <label className="check">
           <input type="checkbox" checked={agree} onChange={(e) => setAgree(e.target.checked)} />

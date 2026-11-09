@@ -3,7 +3,7 @@ package com.depositcock.customer;
 import java.time.LocalDateTime;
 
 import com.depositcock.common.BaseTimeEntity;
-import com.depositcock.order.PhoneNumbers;
+import com.depositcock.common.PhoneNumbers;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;

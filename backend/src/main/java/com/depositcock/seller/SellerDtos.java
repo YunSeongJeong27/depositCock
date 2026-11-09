@@ -4,6 +4,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Map;
 
+import com.depositcock.common.PhoneNumbers;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -19,7 +20,9 @@ public final class SellerDtos {
             @NotBlank(message = "EMAIL_REQUIRED") @Email(message = "EMAIL_INVALID")
             @Size(max = 255, message = "EMAIL_TOO_LONG") String email,
             @NotBlank(message = "PASSWORD_REQUIRED") @Size(min = 8, max = 100, message = "PASSWORD_LENGTH") String password,
-            @NotBlank(message = "SELLER_NAME_REQUIRED") @Size(max = 100, message = "SELLER_NAME_TOO_LONG") String displayName) {
+            @NotBlank(message = "SELLER_NAME_REQUIRED") @Size(max = 100, message = "SELLER_NAME_TOO_LONG") String displayName,
+            /** 휴대폰 번호 (2026-11-09, 인증 없이 적은 그대로) */
+            @NotBlank(message = "PHONE_REQUIRED") @Size(max = 30, message = "PHONE_INVALID") String phone) {
     }
 
     /** 새 회원가입을 받는지 (관리자가 끄면 false) */
@@ -34,7 +37,9 @@ public final class SellerDtos {
             @NotBlank(message = "SELLER_NAME_REQUIRED") @Size(max = 100, message = "SELLER_NAME_TOO_LONG") String displayName,
             @Size(max = 50, message = "BANK_NAME_TOO_LONG") String defaultBankName,
             @Size(max = 50, message = "ACCOUNT_NUMBER_TOO_LONG") String defaultAccountNumber,
-            @Size(max = 50, message = "ACCOUNT_HOLDER_TOO_LONG") String defaultAccountHolder) {
+            @Size(max = 50, message = "ACCOUNT_HOLDER_TOO_LONG") String defaultAccountHolder,
+            /** 휴대폰 번호. null 이면 그대로, 빈 값이면 지움 (이 칸이 생기기 전 가입자도 내 정보를 저장할 수 있게) */
+            @Size(max = 30, message = "PHONE_INVALID") String phone) {
     }
 
     @Builder
@@ -42,6 +47,8 @@ public final class SellerDtos {
             Long id,
             String email,
             String displayName,
+            /** 휴대폰 번호 010-1234-5678 모양, 없으면 null */
+            String phone,
             Role role,
             Plan plan,
             LocalDateTime trialEndsAt,
@@ -63,6 +70,7 @@ public final class SellerDtos {
                     .id(s.getId())
                     .email(s.getEmail())
                     .displayName(s.getDisplayName())
+                    .phone(PhoneNumbers.format(s.getPhone()))
                     .role(s.getRole())
                     .plan(s.getPlan())
                     .trialEndsAt(s.getTrialEndsAt())

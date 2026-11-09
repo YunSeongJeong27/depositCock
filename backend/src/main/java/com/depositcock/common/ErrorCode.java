@@ -52,6 +52,7 @@ public enum ErrorCode {
     ADMIN_CANNOT_SUSPEND(BAD_REQUEST, "관리자 계정은 사용 제한할 수 없습니다."),
     ADMIN_CANNOT_DELETE(BAD_REQUEST, "관리자 계정은 삭제할 수 없습니다."),
     ADMIN_CANNOT_WITHDRAW(BAD_REQUEST, "관리자 계정은 탈퇴할 수 없습니다."),
+    ADMIN_EMAIL_FIXED(BAD_REQUEST, "관리자 계정 이메일은 여기서 바꿀 수 없습니다. 서버 설정 APP_ADMIN_EMAIL 로 정합니다."),
     COMMENT_FEATURE_CLOSED(FORBIDDEN, "댓글 주문 기능은 아직 열려 있지 않습니다. 주문 링크로 주문을 받아 주세요."),
 
     // ---- 공구 설정 ----

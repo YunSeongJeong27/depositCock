@@ -45,12 +45,12 @@ class SecurityReviewTest extends IntegrationTest {
                 .addFilters(context.getBean(CsrfHeaderFilter.class))
                 .apply(springSecurity()).build();
         raw.perform(post("/api/auth/signup").contentType(MediaType.APPLICATION_JSON)
-                        .content(json(Map.of("email", uniqueEmail(), "password", "password123", "displayName", "x"))))
+                        .content(json(Map.of("email", uniqueEmail(), "password", "password123", "displayName", "x", "phone", "010-1234-5678"))))
                 .andExpect(status().isForbidden())
                 .andExpect(jsonPath("$.code").value("CSRF_REJECTED"));
         raw.perform(post("/api/auth/signup").header(CsrfHeaderFilter.HEADER, "depositcock")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(json(Map.of("email", uniqueEmail(), "password", "password123", "displayName", "x"))))
+                        .content(json(Map.of("email", uniqueEmail(), "password", "password123", "displayName", "x", "phone", "010-1234-5678"))))
                 .andExpect(status().isOk());
         // 읽기 요청은 헤더 없이도 된다 (다운로드 링크 등)
         raw.perform(get("/api/public/g/없는토큰")).andExpect(status().isNotFound());

@@ -8,14 +8,17 @@ import java.util.stream.Collectors;
 
 import com.depositcock.admin.AdminDtos.AdminSellerRow;
 import com.depositcock.admin.AdminDtos.AdminUpdateRequest;
+import com.depositcock.admin.AdminDtos.SellerInfoRequest;
 import com.depositcock.common.ApiException;
 import com.depositcock.common.ErrorCode;
+import com.depositcock.common.PhoneNumbers;
 import com.depositcock.common.Texts;
 import com.depositcock.groupbuy.GroupBuyRepository;
 import com.depositcock.groupbuy.GroupBuyRepository.SellerCount;
 import com.depositcock.seller.Role;
 import com.depositcock.seller.Seller;
 import com.depositcock.seller.SellerRepository;
+import com.depositcock.seller.SellerDtos.SignupRequest;
 import com.depositcock.seller.SellerService;
 import com.depositcock.vision.CaptureUsageService;
 import lombok.RequiredArgsConstructor;
@@ -33,6 +36,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class AdminService {
 
     private final SellerRepository sellerRepository;
+    private final SellerService sellerService;
     private final GroupBuyRepository groupBuyRepository;
     private final PasswordEncoder passwordEncoder;
     private final CaptureUsageService captureUsageService;
@@ -52,6 +56,7 @@ public class AdminService {
                             .id(s.getId())
                             .email(s.getEmail())
                             .displayName(s.getDisplayName())
+                            .phone(PhoneNumbers.format(s.getPhone()))
                             .role(s.getRole())
                             .plan(s.getPlan())
                             .trialEndsAt(s.getTrialEndsAt())
@@ -89,6 +94,38 @@ public class AdminService {
         if (request.commentFeatureEnabled() != null) {
             seller.setCommentFeatureEnabled(request.commentFeatureEnabled());
         }
+    }
+
+    /**
+     * 판매자 정보 고치기 (2026-11-09: 관리자가 잘못 넣은 정보를 고칠 수 있게).
+     * 로그인 토큰에는 판매자 id 만 들어 있어 이메일을 바꿔도 로그인은 그대로이고, 메일은 보낼 때 이메일을 읽어 새 주소로 간다.
+     * 관리자 계정 이메일은 못 바꾼다: 앱이 켜질 때 APP_ADMIN_EMAIL 로 관리자 계정을 찾아서, 바꾸면 관리자 계정이 하나 더 생김.
+     */
+    @Transactional
+    public void updateSellerInfo(Long sellerId, SellerInfoRequest request) {
+        Seller seller = sellerRepository.findById(sellerId)
+                .orElseThrow(() -> new ApiException(ErrorCode.SELLER_NOT_FOUND));
+        String email = SellerService.normalizeEmail(request.email());
+        if (!email.equals(seller.getEmail())) {
+            if (seller.getRole() == Role.ADMIN) {
+                throw new ApiException(ErrorCode.ADMIN_EMAIL_FIXED);
+            }
+            if (sellerRepository.existsByEmail(email)) {
+                throw new ApiException(ErrorCode.EMAIL_TAKEN);
+            }
+            seller.setEmail(email);
+        }
+        seller.setDisplayName(request.displayName().trim());
+        seller.setPhone(SellerService.phoneOrNull(request.phone()));
+        if (Texts.blankToNull(request.newPassword()) != null) {
+            seller.setPasswordHash(passwordEncoder.encode(request.newPassword()));
+        }
+    }
+
+    /** 관리자가 판매자 계정을 직접 만든다 (2026-11-09: 메일로 요청받은 경우 등). 회원가입을 꺼 둬도 된다 */
+    @Transactional
+    public void createSeller(SignupRequest request) {
+        sellerService.create(request);
     }
 
     /**

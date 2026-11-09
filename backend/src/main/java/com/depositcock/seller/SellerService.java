@@ -8,6 +8,7 @@ import java.util.Map;
 import com.depositcock.common.ApiException;
 import com.depositcock.common.AppProperties;
 import com.depositcock.common.ErrorCode;
+import com.depositcock.common.PhoneNumbers;
 import com.depositcock.common.Texts;
 import com.depositcock.seller.SellerDtos.SignupRequest;
 import com.depositcock.seller.SellerDtos.UpdateProfileRequest;
@@ -32,13 +33,23 @@ public class SellerService {
         if (!featureAccess.signupOpen()) {
             throw new ApiException(ErrorCode.SIGNUP_CLOSED);
         }
+        return create(request);
+    }
+
+    /**
+     * 판매자 계정 만들기: 회원가입, 관리자가 직접 만들기(2026-11-09, 회원가입을 꺼 둬도 됨). 가입한 날부터 무료 체험.
+     */
+    @Transactional
+    public Seller create(SignupRequest request) {
         String email = normalizeEmail(request.email());
         if (sellerRepository.existsByEmail(email)) {
             throw new ApiException(ErrorCode.EMAIL_TAKEN);
         }
+        String phone = requirePhone(request.phone());
         LocalDateTime now = LocalDateTime.now(clock);
         Seller seller = new Seller(email, passwordEncoder.encode(request.password()), request.displayName().trim(),
                 Role.SELLER, now, now.plusDays(properties.trialDays()));
+        seller.setPhone(phone);
         return sellerRepository.save(seller);
     }
 
@@ -63,6 +74,9 @@ public class SellerService {
         seller.setDefaultBankName(Texts.blankToNull(request.defaultBankName()));
         seller.setDefaultAccountNumber(Texts.blankToNull(request.defaultAccountNumber()));
         seller.setDefaultAccountHolder(Texts.blankToNull(request.defaultAccountHolder()));
+        if (request.phone() != null) {
+            seller.setPhone(phoneOrNull(request.phone()));
+        }
         return seller;
     }
 
@@ -91,6 +105,20 @@ public class SellerService {
             throw new ApiException(ErrorCode.WRONG_PASSWORD);
         }
         sellerRepository.delete(seller);
+    }
+
+    /** 휴대폰 번호를 숫자만으로. 번호 모양이 아니면 PHONE_INVALID */
+    public static String requirePhone(String raw) {
+        String phone = PhoneNumbers.normalize(raw);
+        if (phone == null) {
+            throw new ApiException(ErrorCode.PHONE_INVALID);
+        }
+        return phone;
+    }
+
+    /** 빈 값이면 null(지움), 아니면 requirePhone */
+    public static String phoneOrNull(String raw) {
+        return Texts.blankToNull(raw) == null ? null : requirePhone(raw);
     }
 
     /** 이메일 비교용: 앞뒤 공백을 빼고 소문자로 (관리자 계정 만들기도 같이 씀) */

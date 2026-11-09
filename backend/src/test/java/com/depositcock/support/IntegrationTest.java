@@ -75,7 +75,7 @@ public abstract class IntegrationTest {
     /** 가입 후 로그인 쿠키를 돌려준다. */
     protected Cookie signup(String email) throws Exception {
         MvcResult result = mvc.perform(post("/api/auth/signup").contentType(MediaType.APPLICATION_JSON)
-                        .content(json(Map.of("email", email, "password", "password123", "displayName", "공구장"))))
+                        .content(json(Map.of("email", email, "password", "password123", "displayName", "공구장", "phone", "010-1234-5678"))))
                 .andExpect(status().isOk()).andReturn();
         return result.getResponse().getCookie("DC_TOKEN");
     }
