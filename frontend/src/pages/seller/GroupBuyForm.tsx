@@ -152,10 +152,10 @@ export default function GroupBuyForm() {
       <div className="card">
         <h3>기본 정보</h3>
         <label className="field"><span>공구 제목 *</span>
-          <input type="text" value={form.title} onChange={(e) => set('title', e.target.value)} required placeholder="예: 동해기정떡 2차 (10/15 입고)" />
+          <input type="text" value={form.title} onChange={(e) => set('title', e.target.value)} required />
         </label>
         <label className="field"><span>설명</span>
-          <textarea value={form.description} onChange={(e) => set('description', e.target.value)} placeholder="픽업 날짜·시간, 상품 설명 등" />
+          <textarea value={form.description} onChange={(e) => set('description', e.target.value)} />
         </label>
         <label className="field"><span>주문 마감 일시</span>
           <input type="datetime-local" value={form.closeAt} onChange={(e) => set('closeAt', e.target.value)} />
@@ -171,7 +171,7 @@ export default function GroupBuyForm() {
         {form.products.map((p, i) => (
           <div key={i} className="row mb" style={{ alignItems: 'flex-end' }}>
             <label className="field grow" style={{ minWidth: 160, marginBottom: 0 }}><span>상품명</span>
-              <input type="text" value={p.name} onChange={(e) => set('products', form.products.map((x, j) => (j === i ? { ...x, name: e.target.value } : x)))} placeholder="예: 1box(30조각)" />
+              <input type="text" value={p.name} onChange={(e) => set('products', form.products.map((x, j) => (j === i ? { ...x, name: e.target.value } : x)))} />
             </label>
             <label className="field" style={{ width: 110, marginBottom: 0 }}><span>단가(원)</span>
               <input type="number" min={0} value={p.unitPrice} onChange={(e) => set('products', form.products.map((x, j) => (j === i ? { ...x, unitPrice: e.target.value } : x)))} />
@@ -201,6 +201,7 @@ export default function GroupBuyForm() {
 
       <div className="card">
         <h3>수령 방법</h3>
+        <p className="muted small">{T.receiveHint}</p>
         <label className="check"><input type="checkbox" checked={form.pickupEnabled} onChange={(e) => set('pickupEnabled', e.target.checked)} /> 픽업</label>
         {form.pickupEnabled && (
           <div style={{ marginLeft: 26 }}>
@@ -219,7 +220,7 @@ export default function GroupBuyForm() {
             <button type="button" className="btn small" onClick={() => set('pickupPoints', [...form.pickupPoints, { name: '', info: '' }])}>+ 픽업 지점 추가</button>
           </div>
         )}
-        <label className="check mt"><input type="checkbox" checked={form.deliveryEnabled} onChange={(e) => set('deliveryEnabled', e.target.checked)} /> 배송 — 선입금만 받고 받는 분·주소는 주문서에서 받음</label>
+        <label className="check mt"><input type="checkbox" checked={form.deliveryEnabled} onChange={(e) => set('deliveryEnabled', e.target.checked)} /> 배송 — 선입금만 받고 주문자 성명·전화번호·주소는 주문서에서 받음</label>
         {form.deliveryEnabled && (
           <div style={{ marginLeft: 26 }} className="row">
             <select value={form.shippingFeeType} onChange={(e) => set('shippingFeeType', e.target.value as ShippingFeeType)} style={{ width: 160 }}>
@@ -248,10 +249,10 @@ export default function GroupBuyForm() {
         <h3>고객 입력 항목·기타</h3>
         <label className="check"><input type="checkbox" checked={form.unitAddressFieldEnabled} onChange={(e) => set('unitAddressFieldEnabled', e.target.checked)} /> 동·호수 받기</label>
         <label className="field mt"><span>카톡 문의 링크 (선택)</span>
-          <input type="text" value={form.kakaoInquiryUrl} onChange={(e) => set('kakaoInquiryUrl', e.target.value)} placeholder="https://pf.kakao.com/..." />
+          <input type="text" value={form.kakaoInquiryUrl} onChange={(e) => set('kakaoInquiryUrl', e.target.value)} placeholder="https://" />
         </label>
         <label className="field"><span>관리자 닉네임</span>
-          <input type="text" value={form.adminNames} onChange={(e) => set('adminNames', e.target.value)} placeholder="예: 공구장, 달콤" />
+          <input type="text" value={form.adminNames} onChange={(e) => set('adminNames', e.target.value)} />
           <span className="muted small" style={{ fontWeight: 400 }}>{T.adminNamesHint}</span>
         </label>
       </div>

@@ -2,9 +2,10 @@ import { josa } from './common'
 
 /** 고객 주문 화면(주문서 링크)의 긴 문장. 규칙은 common.ts 맨 위 */
 export const orderText = {
+  nicknamePlaceholder: '공구방에서 쓰는 닉네임으로 적어 주세요',
   postcodeLoadFailed: '주소 검색을 불러오지 못했습니다. 주소를 직접 입력해 주세요.',
   refundRequestedAlert: '환불 신청을 했습니다. 판매자가 확인한 뒤 주문을 취소하고 환불합니다.',
-  cancelledAlert: '주문을 취소했습니다.',
+  cancelledAlert: '주문을 취소했습니다.\n다시 주문하려면 아래 주문서로 새로 주문해 주세요.',
   changeNote: '주문 확정 전에는 **주문 수정**으로 바꿀 수 있습니다. 확정 후에는 **환불 신청** 후 다시 주문해 주세요.',
   pausedNote: '지금은 주문·주문 수정·취소·환불 신청을 잠시 받지 않습니다. 내 주문 보기는 됩니다.',
 
@@ -21,6 +22,7 @@ export const orderText = {
   refundRequested: '환불 신청됨 · 판매자가 확인 중입니다.',
   refundRejected: '환불 신청이 취소됐어요. 판매자에게 문의해 주세요.',
   editableUntilConfirm: '주문 확정 전까지 수정할 수 있어요.',
+  reorderAfterCancel: '취소한 뒤에도 아래 주문서로 다시 주문하면 새 주문으로 정상 접수됩니다.',
   confirmedCannotEdit: '확정된 주문은 수정할 수 없어요. 변경은 환불 신청 후 다시 주문해 주세요.',
 
   // 내 주문 찾기

@@ -24,10 +24,14 @@ public class SellerService {
     private final SellerRepository sellerRepository;
     private final PasswordEncoder passwordEncoder;
     private final AppProperties properties;
+    private final FeatureAccess featureAccess;
     private final Clock clock;
 
     @Transactional
     public Seller signup(SignupRequest request) {
+        if (!featureAccess.signupOpen()) {
+            throw new ApiException(ErrorCode.SIGNUP_CLOSED);
+        }
         String email = normalizeEmail(request.email());
         if (sellerRepository.existsByEmail(email)) {
             throw new ApiException(ErrorCode.EMAIL_TAKEN);

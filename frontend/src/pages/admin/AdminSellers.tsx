@@ -25,6 +25,12 @@ interface Row {
   commentFeatureEnabled: boolean
 }
 
+/** 서비스 전체 설정 (/api/admin/settings) */
+interface Settings {
+  commentFeatureOpen: boolean
+  signupOpen: boolean
+}
+
 /** 이메일이 칸보다 길면 "@" 앞에서 줄을 바꾼다 (글자 중간에서 끊기지 않게) */
 const emailWithBreak = (email: string) => {
   const at = email.indexOf('@')
@@ -37,22 +43,21 @@ export default function AdminSellers() {
   const [editing, setEditing] = useState<Record<number, Row>>({})
   const [error, setError] = useState<string | null>(null)
   const [filter, setFilter] = useState<'all' | 'expired' | 'suspended'>('all')
-  /** 댓글 주문 기능 전체 공개 (꺼져 있으면 아래에서 허용한 판매자만 씀) */
-  const [commentOpen, setCommentOpen] = useState<boolean | null>(null)
+  /** 서비스 전체 설정: 댓글 주문 기능 전체 공개(꺼져 있으면 아래에서 허용한 판매자만 씀), 새 회원가입 받기 */
+  const [settings, setSettings] = useState<Settings | null>(null)
 
   const load = () => api.get<Row[]>('/api/admin/sellers').then(setRows).catch((e) => setError(errorMessage(e)))
   useEffect(() => {
     load()
-    api.get<{ commentFeatureOpen: boolean }>('/api/admin/settings').then((s) => setCommentOpen(s.commentFeatureOpen)).catch((e) => setError(errorMessage(e)))
+    api.get<Settings>('/api/admin/settings').then(setSettings).catch((e) => setError(errorMessage(e)))
   }, [])
 
-  async function toggleCommentOpen(open: boolean) {
-    const text = open ? T.confirmCommentOpen : T.confirmCommentClose
-    if (!confirm(text)) return
+  /** 보낸 설정만 바뀐다 */
+  async function changeSetting(change: Partial<Settings>, confirmText: string) {
+    if (!confirm(confirmText)) return
     setError(null)
     try {
-      const s = await api.put<{ commentFeatureOpen: boolean }>('/api/admin/settings', { commentFeatureOpen: open })
-      setCommentOpen(s.commentFeatureOpen)
+      setSettings(await api.put<Settings>('/api/admin/settings', change))
     } catch (e) {
       setError(errorMessage(e))
     }
@@ -100,14 +105,31 @@ export default function AdminSellers() {
           <div>
             <b>댓글 주문 기능</b> <span className="small muted">· {T.commentFeatureNote}</span>
             <div className="small muted">
-              {commentOpen === null ? '불러오는 중…' : commentOpen
+              {settings === null ? '불러오는 중…' : settings.commentFeatureOpen
                 ? T.commentOpenAll
                 : T.commentClosed}
             </div>
           </div>
-          {commentOpen !== null && (
+          {settings !== null && (
             <label className="check" style={{ whiteSpace: 'nowrap' }}>
-              <input type="checkbox" checked={commentOpen} onChange={(e) => toggleCommentOpen(e.target.checked)} /> 전체 공개
+              <input type="checkbox" checked={settings.commentFeatureOpen}
+                onChange={(e) => changeSetting({ commentFeatureOpen: e.target.checked }, e.target.checked ? T.confirmCommentOpen : T.confirmCommentClose)} /> 전체 공개
+            </label>
+          )}
+        </div>
+      </div>
+      <div className="card">
+        <div className="row between">
+          <div>
+            <b>회원가입</b>
+            <div className="small muted">
+              {settings === null ? '불러오는 중…' : settings.signupOpen ? T.signupOpenNow : T.signupClosedNow}
+            </div>
+          </div>
+          {settings !== null && (
+            <label className="check" style={{ whiteSpace: 'nowrap' }}>
+              <input type="checkbox" checked={settings.signupOpen}
+                onChange={(e) => changeSetting({ signupOpen: e.target.checked }, e.target.checked ? T.confirmSignupOpen : T.confirmSignupClose)} /> 가입 받기
             </label>
           )}
         </div>

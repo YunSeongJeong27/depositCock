@@ -51,7 +51,7 @@ public final class AdminDtos {
             Boolean commentFeatureEnabled) {
     }
 
-    /** 서비스 전체 설정 (관리자) */
-    public record AdminSettings(boolean commentFeatureOpen) {
+    /** 서비스 전체 설정 (관리자). 바꿀 때는 보낸 값만 바꾸고 null 은 그대로 둔다 */
+    public record AdminSettings(Boolean commentFeatureOpen, Boolean signupOpen) {
     }
 }

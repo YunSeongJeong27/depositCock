@@ -176,6 +176,10 @@ function MyOrdersCard({ view, onEdit, onCancel }: {
           {confirmedOrder(o) && <div className="small muted mt">{T.confirmedCannotEdit}</div>}
         </div>
       ))}
+      {/* 취소한 주문이 있으면 다시 주문해도 된다는 안내 한 줄 (주문서가 열려 있을 때만, 2026-11-09) */}
+      {view.acceptingOrders && !view.paused && view.myOrders.some((o) => o.status === 'CANCELLED') && (
+        <div className="small muted" style={{ borderTop: '1px solid var(--line)', paddingTop: 10 }}>{T.reorderAfterCancel}</div>
+      )}
     </div>
   )
 }
@@ -530,8 +534,8 @@ export default function PublicOrder() {
 
           {receive === 'DELIVERY' && (
             <div className="mt">
-              <label className="field"><span>받는 분 *</span><input type="text" value={form.recipientName} onChange={(e) => set('recipientName', e.target.value)} required /></label>
-              <label className="field"><span>받는 분 연락처 *</span><input type="tel" value={form.recipientPhone} onChange={(e) => set('recipientPhone', e.target.value)} required placeholder="010-0000-0000" /></label>
+              <label className="field"><span>주문자 성명 *</span><input type="text" value={form.recipientName} onChange={(e) => set('recipientName', e.target.value)} required /></label>
+              <label className="field"><span>주문자 전화번호 *</span><input type="tel" value={form.recipientPhone} onChange={(e) => set('recipientPhone', e.target.value)} required placeholder="010-0000-0000" /></label>
               <div className="field"><span style={{ fontWeight: 600, display: 'block', marginBottom: 4 }}>주소 *</span>
                 <div className="row">
                   <input type="text" value={form.zipcode} readOnly placeholder="우편번호" style={{ width: 110 }} />
@@ -552,8 +556,8 @@ export default function PublicOrder() {
                 ? <span className="muted small" style={{ fontWeight: 400 }}>{T.depositorHintOnsite}</span>
                 : <span className="small" style={{ color: 'var(--danger)' }}>{T.depositorHintTransfer}</span>}
             </label>
-            <label className="field"><span>{view.nicknameRequired ? '닉네임 *' : '닉네임 (선택)'}</span><input type="text" value={form.nickname} onChange={(e) => set('nickname', e.target.value)} required={view.nicknameRequired} /></label>
-            {view.unitAddressFieldEnabled && <label className="field"><span>동·호수 *</span><input type="text" value={form.unitAddress} onChange={(e) => set('unitAddress', e.target.value)} required placeholder="예: 101동 1203호" /></label>}
+            <label className="field"><span>{view.nicknameRequired ? '닉네임 *' : '닉네임 (선택)'}</span><input type="text" value={form.nickname} onChange={(e) => set('nickname', e.target.value)} required={view.nicknameRequired} placeholder={T.nicknamePlaceholder} /></label>
+            {view.unitAddressFieldEnabled && <label className="field"><span>동·호수 *</span><input type="text" value={form.unitAddress} onChange={(e) => set('unitAddress', e.target.value)} required /></label>}
           </div>
 
           <div className="card" style={{ background: '#f9fafb' }}>
@@ -638,8 +642,8 @@ export default function PublicOrder() {
             <label className="field"><span>주문할 때 적은 입금자명</span><input type="text" value={cancel.depositorName} onChange={(e) => setCancel({ ...cancel, depositorName: e.target.value, choices: [] })} required /></label>
             {cancel.mode === 'refund' && (
               <>
-                <label className="field"><span>환불받을 은행</span><input type="text" value={cancel.bankName} onChange={(e) => setCancel({ ...cancel, bankName: e.target.value })} required maxLength={30} placeholder="예: 국민은행" /></label>
-                <label className="field"><span>계좌번호</span><input type="text" inputMode="numeric" value={cancel.accountNumber} onChange={(e) => setCancel({ ...cancel, accountNumber: e.target.value })} required maxLength={30} placeholder="예: 123-456-789012" /></label>
+                <label className="field"><span>환불받을 은행</span><input type="text" value={cancel.bankName} onChange={(e) => setCancel({ ...cancel, bankName: e.target.value })} required maxLength={30} /></label>
+                <label className="field"><span>계좌번호</span><input type="text" inputMode="numeric" value={cancel.accountNumber} onChange={(e) => setCancel({ ...cancel, accountNumber: e.target.value })} required maxLength={30} /></label>
               </>
             )}
             {cancelTarget && cancel.choices.length === 0 && (
@@ -671,7 +675,6 @@ export default function PublicOrder() {
           </form>
         )}
       </div>}
-      <footer className="footer"><Brand /> · <a href="/privacy">개인정보처리방침</a></footer>
     </div>
   )
 }

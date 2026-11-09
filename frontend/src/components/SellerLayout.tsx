@@ -39,9 +39,6 @@ export default function SellerLayout() {
       <main className={`container wide${wider ? ' wider' : ''}`}>
         <Outlet />
       </main>
-      <footer className="footer">
-        <Link to="/privacy">개인정보처리방침</Link> · <Link to="/terms">이용약관</Link>
-      </footer>
     </div>
   )
 }
