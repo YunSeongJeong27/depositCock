@@ -1,9 +1,11 @@
 import { Link, Navigate } from 'react-router-dom'
-import { useAuth } from '../auth'
+import { useAuth, useSignupOpen } from '../auth'
 import { Brand } from '../components/Ui'
+import { accountText as T } from '../texts/account'
 
 export default function Home() {
   const { me, loading } = useAuth()
+  const signupOpen = useSignupOpen()
   if (!loading && me) return <Navigate to="/seller" replace />
   return (
     <div>
@@ -11,9 +13,12 @@ export default function Home() {
         <h1><Brand /></h1>
         <p>계좌 입금내역만 올리면 입금자 콕! 공구 장부 한 번에</p>
         <div className="row" style={{ justifyContent: 'center' }}>
-          <Link className="btn primary" to="/signup">무료로 시작하기</Link>
+          {signupOpen === false
+            ? <button className="btn primary" disabled>무료로 시작하기</button>
+            : <Link className="btn primary" to="/signup">무료로 시작하기</Link>}
           <Link className="btn" to="/login">로그인</Link>
         </div>
+        {signupOpen === false && <p className="small">{T.signupClosed}</p>}
         <div className="promo">가입 후 조건 없이 첫 달 무료</div>
         <p className="small">무료 기간이 끝나도 자동 결제는 없으니 안심하세요!</p>
       </div>
@@ -33,9 +38,6 @@ export default function Home() {
           </div>
         </div>
       </div>
-      <footer className="footer">
-        <Link to="/privacy">개인정보처리방침</Link> · <Link to="/terms">이용약관</Link>
-      </footer>
     </div>
   )
 }

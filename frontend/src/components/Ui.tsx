@@ -1,5 +1,7 @@
 import { useEffect, useState, type CSSProperties, type ReactNode } from 'react'
+import { Link, useLocation } from 'react-router-dom'
 import { copyText } from '../api'
+import { SUPPORT_EMAIL } from '../texts/common'
 
 /**
  * 문구 파일(src/texts)의 문장을 그린다. **굵게** 와 [글자](/경로) 링크(새 탭)만 바꾼다.
@@ -24,6 +26,23 @@ export function Brand() {
     <span className="brand-logo">
       <img src="/logo.svg" alt="" />입금<em>콕</em>
     </span>
+  )
+}
+
+/**
+ * 모든 화면 맨 아래 (2026-11-09: 문의처를 넣으며 화면마다 따로 있던 아래쪽을 하나로).
+ * 고객 주문 화면은 서비스 이름 + 개인정보처리방침 (이용약관은 판매자와의 약관이라 뺌), 나머지는 개인정보처리방침 + 이용약관
+ */
+export function SiteFooter() {
+  const customerPage = useLocation().pathname.startsWith('/g/')
+  return (
+    <footer className="footer">
+      {customerPage
+        ? <><Brand /> · <Link to="/privacy">개인정보처리방침</Link></>
+        : <><Link to="/privacy">개인정보처리방침</Link> · <Link to="/terms">이용약관</Link></>}
+      <br />
+      문의 : <a href={`mailto:${SUPPORT_EMAIL}`}>{SUPPORT_EMAIL}</a>
+    </footer>
   )
 }
 

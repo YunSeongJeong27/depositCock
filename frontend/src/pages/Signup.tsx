@@ -1,13 +1,14 @@
 import { useState, type FormEvent } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { api, errorMessage } from '../api'
-import { useAuth } from '../auth'
+import { useAuth, useSignupOpen } from '../auth'
 import { Brand, ErrorBox } from '../components/Ui'
 import { accountText as T } from '../texts/account'
 import type { Me } from '../types'
 
 export default function Signup() {
   const { setMe } = useAuth()
+  const signupOpen = useSignupOpen()
   const navigate = useNavigate()
   const [form, setForm] = useState({ email: '', password: '', displayName: '' })
   const [agree, setAgree] = useState(false)
@@ -53,7 +54,8 @@ export default function Signup() {
           <span><Link to="/terms" target="_blank">이용약관</Link>과 <Link to="/privacy" target="_blank">개인정보처리방침</Link>에 동의합니다.</span>
         </label>
         <ErrorBox message={error} />
-        <button className="btn primary block" disabled={busy}>가입하고 첫 달 무료로 시작</button>
+        <button className="btn primary block" disabled={busy || signupOpen === false}>가입하고 첫 달 무료로 시작</button>
+        {signupOpen === false && <p className="small">{T.signupClosed}</p>}
       </form>
       <p className="muted">이미 계정이 있나요? <Link to="/login">로그인</Link></p>
     </div>

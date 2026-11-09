@@ -2,6 +2,7 @@ import { josa } from './common'
 
 /** 고객 주문 화면(주문서 링크)의 긴 문장. 규칙은 common.ts 맨 위 */
 export const orderText = {
+  nicknamePlaceholder: '공구방에서 쓰는 닉네임으로 적어 주세요',
   postcodeLoadFailed: '주소 검색을 불러오지 못했습니다. 주소를 직접 입력해 주세요.',
   refundRequestedAlert: '환불 신청을 했습니다. 판매자가 확인한 뒤 주문을 취소하고 환불합니다.',
   cancelledAlert: '주문을 취소했습니다.',

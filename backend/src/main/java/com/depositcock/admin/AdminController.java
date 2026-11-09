@@ -31,13 +31,19 @@ public class AdminController {
 
     @GetMapping("/api/admin/settings")
     public AdminSettings settings() {
-        return new AdminSettings(featureAccess.commentFeatureOpen());
+        return new AdminSettings(featureAccess.commentFeatureOpen(), featureAccess.signupOpen());
     }
 
-    /** 댓글 주문 기능 전체 공개 켜기/끄기 */
+    /** 댓글 주문 기능 전체 공개, 새 회원가입 받기 켜기/끄기 */
     @PutMapping("/api/admin/settings")
     public AdminSettings updateSettings(@RequestBody AdminSettings request) {
-        featureAccess.setCommentFeatureOpen(request.commentFeatureOpen(), LocalDateTime.now(clock));
+        LocalDateTime now = LocalDateTime.now(clock);
+        if (request.commentFeatureOpen() != null) {
+            featureAccess.setCommentFeatureOpen(request.commentFeatureOpen(), now);
+        }
+        if (request.signupOpen() != null) {
+            featureAccess.setSignupOpen(request.signupOpen(), now);
+        }
         return settings();
     }
 

@@ -1,9 +1,12 @@
+import { SUPPORT_EMAIL } from './common'
+
 /** 로그인·가입, 내 정보(알림·탈퇴), 관리자 화면의 긴 문장. 규칙은 common.ts 맨 위 */
 export const accountText = {
   // 로그인·가입
   loginExpired: '로그인이 만료되었습니다. 다시 로그인해 주세요.',
   agreeRequired: '이용약관과 개인정보처리방침에 동의해 주세요.',
   displayNameHint: '고객 화면에 보이는 이름입니다.',
+  signupClosed: `관리자가 잠시 회원가입을 비활성화 했습니다. ${SUPPORT_EMAIL} 으로 문의해주시면 바로 안내해드리겠습니다.`,
 
   // 내 정보
   withdrawPrompt: '탈퇴하면 모든 공구·주문·입금 정보가 삭제되고 되돌릴 수 없습니다. 필요한 주문 정리표는 먼저 내려받으세요.\n계속하려면 비밀번호를 입력하세요.',
@@ -23,4 +26,8 @@ export const accountText = {
   commentOpenAll: '모든 판매자에게 열려 있습니다.',
   commentClosed: '닫혀 있습니다. 아래 표에서 "댓글 기능"을 체크한 판매자만 씁니다. 주문 링크·입금 대조는 상관없이 씁니다.',
   commentFeatureTitle: '전체 공개가 꺼져 있을 때 이 판매자만 댓글 주문 기능을 쓰게 함',
+  signupOpenNow: '새 판매자가 회원가입할 수 있습니다.',
+  signupClosedNow: '새 판매자가 회원가입할 수 없습니다. 첫 화면·로그인·회원가입 화면의 가입 버튼이 꺼집니다. 이미 가입한 판매자는 그대로 씁니다.',
+  confirmSignupOpen: '새 판매자 회원가입을 다시 받습니다. 계속할까요?',
+  confirmSignupClose: '새 판매자 회원가입을 막습니다. 첫 화면·로그인·회원가입 화면의 가입 버튼이 꺼집니다. 이미 가입한 판매자는 그대로 씁니다. 계속할까요?',
 }

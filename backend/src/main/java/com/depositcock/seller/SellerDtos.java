@@ -22,6 +22,10 @@ public final class SellerDtos {
             @NotBlank(message = "SELLER_NAME_REQUIRED") @Size(max = 100, message = "SELLER_NAME_TOO_LONG") String displayName) {
     }
 
+    /** 새 회원가입을 받는지 (관리자가 끄면 false) */
+    public record SignupStatus(boolean open) {
+    }
+
     public record LoginRequest(@NotBlank(message = "EMAIL_REQUIRED") String email,
                                @NotBlank(message = "PASSWORD_REQUIRED") String password) {
     }

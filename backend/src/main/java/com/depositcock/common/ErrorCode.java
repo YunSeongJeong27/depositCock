@@ -44,6 +44,7 @@ public enum ErrorCode {
     LOGIN_REQUIRED(UNAUTHORIZED, "로그인이 필요합니다."),
     LOGIN_FAILED(UNAUTHORIZED, "이메일 또는 비밀번호가 맞지 않습니다."),
     EMAIL_TAKEN(CONFLICT, "이미 가입된 이메일입니다."),
+    SIGNUP_CLOSED(FORBIDDEN, "관리자가 잠시 회원가입을 비활성화 했습니다. khyonly00@gmail.com 으로 문의해주시면 바로 안내해드리겠습니다."),
     WRONG_PASSWORD(BAD_REQUEST, "비밀번호가 맞지 않습니다."),
     SELLER_NOT_FOUND(NOT_FOUND, "판매자를 찾을 수 없습니다."),
     SELLER_SUSPENDED(FORBIDDEN, "관리자가 사용을 제한한 계정입니다. 조회만 할 수 있습니다."),

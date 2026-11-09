@@ -44,6 +44,8 @@ public abstract class IntegrationTest {
     @org.junit.jupiter.api.BeforeEach
     void openCommentFeature() {
         setCommentFeatureOpen(true);
+        // 회원가입 받기는 처음 값(받음)으로. 끈 상태는 SignupOpenTest 가 직접 바꿔서 확인한다 (2026-11-09)
+        settingsJdbc.update("delete from app_setting where setting_key = 'signup_open'");
     }
 
     protected void setCommentFeatureOpen(boolean open) {

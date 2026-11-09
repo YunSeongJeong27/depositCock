@@ -552,7 +552,7 @@ export default function PublicOrder() {
                 ? <span className="muted small" style={{ fontWeight: 400 }}>{T.depositorHintOnsite}</span>
                 : <span className="small" style={{ color: 'var(--danger)' }}>{T.depositorHintTransfer}</span>}
             </label>
-            <label className="field"><span>{view.nicknameRequired ? '닉네임 *' : '닉네임 (선택)'}</span><input type="text" value={form.nickname} onChange={(e) => set('nickname', e.target.value)} required={view.nicknameRequired} /></label>
+            <label className="field"><span>{view.nicknameRequired ? '닉네임 *' : '닉네임 (선택)'}</span><input type="text" value={form.nickname} onChange={(e) => set('nickname', e.target.value)} required={view.nicknameRequired} placeholder={T.nicknamePlaceholder} /></label>
             {view.unitAddressFieldEnabled && <label className="field"><span>동·호수 *</span><input type="text" value={form.unitAddress} onChange={(e) => set('unitAddress', e.target.value)} required /></label>}
           </div>
 
@@ -671,7 +671,6 @@ export default function PublicOrder() {
           </form>
         )}
       </div>}
-      <footer className="footer"><Brand /> · <a href="/privacy">개인정보처리방침</a></footer>
     </div>
   )
 }

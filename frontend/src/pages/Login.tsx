@@ -1,13 +1,14 @@
 import { useState, type FormEvent } from 'react'
 import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import { api, errorMessage } from '../api'
-import { useAuth } from '../auth'
+import { useAuth, useSignupOpen } from '../auth'
 import { Brand, ErrorBox } from '../components/Ui'
 import { accountText as T } from '../texts/account'
 import type { Me } from '../types'
 
 export default function Login() {
   const { setMe } = useAuth()
+  const signupOpen = useSignupOpen()
   const navigate = useNavigate()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -44,7 +45,9 @@ export default function Login() {
         <ErrorBox message={error} />
         <button className="btn primary block" disabled={busy}>로그인</button>
       </form>
-      <p className="muted">계정이 없나요? <Link to="/signup">회원가입</Link></p>
+      {signupOpen === false
+        ? <p className="muted">{T.signupClosed}</p>
+        : <p className="muted">계정이 없나요? <Link to="/signup">회원가입</Link></p>}
     </div>
   )
 }
