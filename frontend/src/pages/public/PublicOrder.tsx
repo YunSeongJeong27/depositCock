@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useState, type FormEvent, type ReactNode } from 'react'
 import { useParams } from 'react-router-dom'
 import { ApiError, api, dateTime, errorMessage, itemsText, receiveText, won } from '../../api'
-import { CopyButton, ErrorBox, Rich, StatusBadge } from '../../components/Ui'
+import { Brand, CopyButton, ErrorBox, Rich, StatusBadge } from '../../components/Ui'
 import { orderText as T } from '../../texts/order'
 import type { PaymentMethod, ReceiveMethod, ShippingFeeType } from '../../types'
 
@@ -402,7 +402,7 @@ export default function PublicOrder() {
     }
   }
 
-  if (loadError) return <div className="container narrow"><h2>📌 입금콕</h2><ErrorBox message={loadError} /></div>
+  if (loadError) return <div className="container narrow"><h2><Brand /></h2><ErrorBox message={loadError} /></div>
   if (!view) return <div className="page-loading">불러오는 중…</div>
   const set = (k: keyof typeof emptyForm, v: string) => setForm((f) => ({ ...f, [k]: v }))
   /**
@@ -671,7 +671,7 @@ export default function PublicOrder() {
           </form>
         )}
       </div>}
-      <footer className="footer">📌 입금콕 · <a href="/privacy">개인정보처리방침</a></footer>
+      <footer className="footer"><Brand /> · <a href="/privacy">개인정보처리방침</a></footer>
     </div>
   )
 }
