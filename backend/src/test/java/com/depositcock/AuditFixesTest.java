@@ -153,8 +153,6 @@ class AuditFixesTest extends IntegrationTest {
         Map<String, Object> delivery = order(g.productId(), "010-9700-0002", "나");
         delivery.put("receiveMethod", "DELIVERY");
         delivery.put("paymentMethod", "PREPAID");
-        delivery.put("recipientName", "나");
-        delivery.put("recipientPhone", "010-9700-0003");
         delivery.put("address", address);
         mvc.perform(withJson(post("/api/public/g/" + g.token() + "/orders"), delivery)).andExpect(status().isOk());
         byte[] xlsx = mvc.perform(get("/api/seller/group-buys/" + g.id() + "/export.xlsx").param("includeContact", "true")

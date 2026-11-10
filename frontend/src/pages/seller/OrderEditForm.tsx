@@ -23,8 +23,6 @@ export default function OrderEditForm({ groupBuy, order, onSaved, onClose }: Pro
     depositorName: order.depositorName ?? '',
     nickname: order.nickname ?? '',
     unitAddress: order.unitAddress ?? '',
-    recipientName: order.recipientName ?? '',
-    recipientPhone: order.recipientPhone ?? '',
     zipcode: order.zipcode ?? '',
     address: order.address ?? '',
     addressDetail: order.addressDetail ?? '',
@@ -75,8 +73,6 @@ export default function OrderEditForm({ groupBuy, order, onSaved, onClose }: Pro
         depositorName: form.depositorName || null,
         nickname: form.nickname || null,
         unitAddress: form.unitAddress || null,
-        recipientName: receive === 'DELIVERY' ? form.recipientName : null,
-        recipientPhone: receive === 'DELIVERY' ? form.recipientPhone : null,
         zipcode: receive === 'DELIVERY' ? form.zipcode || null : null,
         address: receive === 'DELIVERY' ? form.address : null,
         addressDetail: receive === 'DELIVERY' ? form.addressDetail || null : null,
@@ -149,12 +145,6 @@ export default function OrderEditForm({ groupBuy, order, onSaved, onClose }: Pro
         )}
         {receive === 'DELIVERY' && (
           <>
-            <label className="field"><span>수령인</span>
-              <input type="text" value={form.recipientName} onChange={(e) => set('recipientName', e.target.value)} />
-            </label>
-            <label className="field"><span>수령인 전화번호</span>
-              <input type="tel" value={form.recipientPhone} onChange={(e) => set('recipientPhone', e.target.value)} />
-            </label>
             <label className="field"><span>우편번호</span>
               <input type="text" value={form.zipcode} onChange={(e) => set('zipcode', e.target.value)} />
             </label>

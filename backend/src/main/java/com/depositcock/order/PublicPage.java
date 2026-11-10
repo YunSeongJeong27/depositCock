@@ -200,8 +200,6 @@ class PublicPage {
                 .receiveMethod(o.getReceiveMethod())
                 .pickupPointId(pointId)
                 .paymentMethod(o.getPaymentMethod())
-                .recipientName(o.getRecipientName())
-                .recipientPhone(PhoneNumbers.format(o.getRecipientPhone()))
                 .zipcode(o.getZipcode())
                 .address(o.getAddress())
                 .addressDetail(o.getAddressDetail())

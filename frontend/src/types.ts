@@ -142,8 +142,6 @@ export interface SellerOrder {
   receiveMethod: ReceiveMethod
   pickupPointId: number | null
   pickupPointName: string | null
-  recipientName: string | null
-  recipientPhone: string | null
   zipcode: string | null
   address: string | null
   addressDetail: string | null

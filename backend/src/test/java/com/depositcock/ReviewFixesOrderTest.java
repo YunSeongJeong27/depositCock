@@ -90,8 +90,6 @@ class ReviewFixesOrderTest extends IntegrationTest {
         body.put("deliveryEnabled", true);
         Opened g = open(body);
         Map<String, Object> first = order(g.productId(), 1, "010-5100-0001", "가", true);
-        first.put("recipientName", "받는분");
-        first.put("recipientPhone", "010-5100-0009");
         first.put("address", "주소");
         mvc.perform(withJson(post("/api/public/g/" + g.token() + "/orders"), first)).andExpect(status().isOk());
         // 같은 연락처(경고 대상) + 주소 없음 → 경고(409)가 아니라 입력 오류(400)가 먼저
@@ -143,8 +141,6 @@ class ReviewFixesOrderTest extends IntegrationTest {
         Map<String, Object> o = order(g.productId(), 1, "010-5300-1234", "박서준", true);
         o.put("receiveMethod", "DELIVERY");
         o.put("unitAddress", "101동 1203호");
-        o.put("recipientName", "박서준");
-        o.put("recipientPhone", "010-5300-1234");
         o.put("zipcode", "12345");
         o.put("address", "서울시 비밀구 1");
         MvcResult placed = mvc.perform(withJson(post(url + "/orders"), o)).andExpect(status().isOk()).andReturn();

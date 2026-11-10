@@ -45,8 +45,6 @@ final class OrderUpdate {
         order.setReceiveMethod(v.receive());
         order.setPickupPoint(v.point());
         order.setPaymentMethod(v.payment());
-        order.setRecipientName(v.delivery().recipientName());
-        order.setRecipientPhone(v.delivery().recipientPhone());
         order.setZipcode(v.delivery().zipcode());
         order.setAddress(v.delivery().address());
         order.setAddressDetail(v.delivery().addressDetail());
