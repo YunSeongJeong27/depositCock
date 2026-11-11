@@ -220,7 +220,7 @@ export default function GroupBuyForm() {
             <button type="button" className="btn small" onClick={() => set('pickupPoints', [...form.pickupPoints, { name: '', info: '' }])}>+ 픽업 지점 추가</button>
           </div>
         )}
-        <label className="check mt"><input type="checkbox" checked={form.deliveryEnabled} onChange={(e) => set('deliveryEnabled', e.target.checked)} /> 배송 — 선입금만 받고 주문자 성명·전화번호·주소는 주문서에서 받음</label>
+        <label className="check mt"><input type="checkbox" checked={form.deliveryEnabled} onChange={(e) => set('deliveryEnabled', e.target.checked)} /> 배송 — 선입금만 받고 주소는 주문서에서 받음</label>
         {form.deliveryEnabled && (
           <div style={{ marginLeft: 26 }} className="row">
             <select value={form.shippingFeeType} onChange={(e) => set('shippingFeeType', e.target.value as ShippingFeeType)} style={{ width: 160 }}>

@@ -31,6 +31,8 @@ interface Row {
 interface Settings {
   commentFeatureOpen: boolean
   signupOpen: boolean
+  /** 입금 대조 "은행앱 화면 캡처로 올리기" (2026-11-09) */
+  depositCaptureOpen: boolean
 }
 
 /** 이메일이 칸보다 길면 "@" 앞에서 줄을 바꾼다 (글자 중간에서 끊기지 않게) */
@@ -202,6 +204,22 @@ export default function AdminSellers() {
             <label className="check" style={{ whiteSpace: 'nowrap' }}>
               <input type="checkbox" checked={settings.signupOpen}
                 onChange={(e) => changeSetting({ signupOpen: e.target.checked }, e.target.checked ? T.confirmSignupOpen : T.confirmSignupClose)} /> 가입 받기
+            </label>
+          )}
+        </div>
+      </div>
+      <div className="card">
+        <div className="row between">
+          <div>
+            <b>은행앱 화면 캡처로 올리기</b> <span className="small muted">· {T.depositCaptureNote}</span>
+            <div className="small muted">
+              {settings === null ? '불러오는 중…' : settings.depositCaptureOpen ? T.depositCaptureOnNow : T.depositCaptureOffNow}
+            </div>
+          </div>
+          {settings !== null && (
+            <label className="check" style={{ whiteSpace: 'nowrap' }}>
+              <input type="checkbox" checked={settings.depositCaptureOpen}
+                onChange={(e) => changeSetting({ depositCaptureOpen: e.target.checked }, e.target.checked ? T.confirmDepositCaptureOpen : T.confirmDepositCaptureClose)} /> 사용
             </label>
           )}
         </div>

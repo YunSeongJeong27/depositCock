@@ -8,7 +8,6 @@ import java.util.stream.Collectors;
 
 import com.depositcock.common.ApiException;
 import com.depositcock.common.ErrorCode;
-import com.depositcock.common.PhoneNumbers;
 import com.depositcock.common.Texts;
 import com.depositcock.groupbuy.GroupBuy;
 import com.depositcock.groupbuy.PickupPoint;
@@ -94,18 +93,16 @@ final class OrderRules {
         return quantities;
     }
 
-    /** 배송 정보. 배송이 아니면 Delivery.NONE. 주문자 성명·전화번호·주소(배송 칸) 중 하나라도 없으면 missingError */
+    /** 배송 정보. 배송이 아니면 Delivery.NONE. 주소가 없으면 missingError (수령인은 안 받음, 2026-11-10) */
     static Delivery delivery(ReceiveMethod receive, DeliveryInput r, ErrorCode missingError) {
         if (receive != ReceiveMethod.DELIVERY) {
             return Delivery.NONE;
         }
-        String name = Texts.blankToNull(r.recipientName());
-        String phone = PhoneNumbers.normalize(r.recipientPhone());
         String address = Texts.blankToNull(r.address());
-        if (name == null || phone == null || address == null) {
+        if (address == null) {
             throw new ApiException(missingError);
         }
-        return new Delivery(name, phone, Texts.blankToNull(r.zipcode()), address, Texts.blankToNull(r.addressDetail()));
+        return new Delivery(Texts.blankToNull(r.zipcode()), address, Texts.blankToNull(r.addressDetail()));
     }
 
     /** 배송비: 배송 주문이고 공구가 고정 배송비일 때만 (새 주문·주문 변경이 같이 씀) */

@@ -18,6 +18,8 @@ export interface Me {
   defaultAccountHolder: string | null
   /** 댓글 주문 기능을 쓸 수 있는지 (관리자가 전체 공개했거나 이 판매자에게 허용) */
   commentFeatureEnabled: boolean
+  /** 입금 대조 "은행앱 화면 캡처로 올리기"를 쓸 수 있는지 (관리자가 켜고 끔, 2026-11-09) */
+  depositCaptureEnabled: boolean
   /** 공구를 만든 뒤 뜨는 "제품 판매 TIP"을 다시 보지 않기로 했는지 (2026-10-26) */
   salesTipHidden: boolean
   /** 알림 켜짐/꺼짐 (2026-10-19, 모든 종류가 옴) */
@@ -140,8 +142,6 @@ export interface SellerOrder {
   receiveMethod: ReceiveMethod
   pickupPointId: number | null
   pickupPointName: string | null
-  recipientName: string | null
-  recipientPhone: string | null
   zipcode: string | null
   address: string | null
   addressDetail: string | null

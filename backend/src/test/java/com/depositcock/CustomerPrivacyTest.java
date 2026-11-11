@@ -43,8 +43,6 @@ class CustomerPrivacyTest extends IntegrationTest {
         o.put("depositorName", depositor);
         o.put("acknowledgeWarnings", true);
         o.put("receiveMethod", "DELIVERY");
-        o.put("recipientName", depositor);
-        o.put("recipientPhone", phone);
         o.put("address", address);
         return o;
     }

@@ -46,7 +46,7 @@ interface MyOrder {
 }
 interface Prefill {
   phone: string; depositorName: string; nickname: string | null; unitAddress: string | null; receiveMethod: ReceiveMethod
-  pickupPointId: number | null; paymentMethod: PaymentMethod; recipientName: string | null; recipientPhone: string | null
+  pickupPointId: number | null; paymentMethod: PaymentMethod
   zipcode: string | null; address: string | null; addressDetail: string | null
   /** true: 이 기기에서 넣은 주문이 아니라(내 주문 찾기) 휴대폰·동호수·배송지는 비어 있음 */
   limited: boolean
@@ -72,7 +72,7 @@ const emptyCancel = {
 }
 /** 방금 넣거나 바꾼 주문의 최종 내용 (이번에 적은 값만 들어 있음) */
 interface FinalOrder {
-  order: MyOrder; nickname: string | null; unitAddress: string | null; recipientName: string | null; recipientPhone: string | null
+  order: MyOrder; nickname: string | null; unitAddress: string | null
   zipcode: string | null; address: string | null; addressDetail: string | null
 }
 /** changed: 새 주문이 아니라 같은 번호의 기존 주문(orderNo)을 바꿈 */
@@ -123,7 +123,7 @@ function OrderSummary({ o, title, f }: { o: MyOrder; title: ReactNode; f?: Final
       <div className="small mt">
         <div>수령: {receiveText(o)}</div>
         {o.receiveMethod === 'DELIVERY' && f && (
-          <div>배송지: {f.recipientName} · {f.recipientPhone} · {f.zipcode ? `${f.zipcode} ` : ''}{f.address}{f.addressDetail ? ' ' + f.addressDetail : ''}</div>
+          <div>배송지: {f.zipcode ? `${f.zipcode} ` : ''}{f.address}{f.addressDetail ? ' ' + f.addressDetail : ''}</div>
         )}
         <div>결제: {o.paymentMethod === 'PREPAID' ? `선입금 · 입금자명 ${o.depositorName}` : `현장결제 · 이름 ${o.depositorName}`}</div>
         {f?.nickname && <div>닉네임: {f.nickname}</div>}
@@ -226,14 +226,14 @@ function IdentifyCard({ base, kakaoInquiryUrl, onFound }: { base: string; kakaoI
 
 const emptyForm = {
   phone: '', depositorName: '', nickname: '', unitAddress: '', receiveMethod: '' as ReceiveMethod | '', pickupPointId: '',
-  paymentMethod: '' as PaymentMethod | '', recipientName: '', recipientPhone: '', zipcode: '', address: '', addressDetail: '',
+  paymentMethod: '' as PaymentMethod | '', zipcode: '', address: '', addressDetail: '',
 }
 
 function formFrom(p: Prefill): typeof emptyForm {
   return {
     phone: p.phone ?? '', depositorName: p.depositorName ?? '', nickname: p.nickname ?? '', unitAddress: p.unitAddress ?? '',
     receiveMethod: p.receiveMethod ?? '', pickupPointId: p.pickupPointId ? String(p.pickupPointId) : '', paymentMethod: p.paymentMethod ?? '',
-    recipientName: p.recipientName ?? '', recipientPhone: p.recipientPhone ?? '', zipcode: p.zipcode ?? '', address: p.address ?? '',
+    zipcode: p.zipcode ?? '', address: p.address ?? '',
     addressDetail: p.addressDetail ?? '',
   }
 }
@@ -285,7 +285,7 @@ export default function PublicOrder() {
         items: view.products.map((p) => ({ productId: p.id, quantity: qty[p.id] ?? 0 })).filter((i) => i.quantity > 0),
         phone: form.phone, depositorName: form.depositorName, nickname: form.nickname || null, unitAddress: form.unitAddress || null,
         receiveMethod: receive || null, pickupPointId: form.pickupPointId ? Number(form.pickupPointId) : null, paymentMethod: payment || null,
-        recipientName: form.recipientName || null, recipientPhone: form.recipientPhone || null, zipcode: form.zipcode || null,
+        zipcode: form.zipcode || null,
         address: form.address || null, addressDetail: form.addressDetail || null,
         // [주문 수정]은 고객이 주문을 직접 고른 것이라 경고 없이 그 주문을 수정 (서버가 수정할 수 없으면 다시 경고)
         acknowledgeWarnings: acknowledge || editing !== null,
@@ -534,8 +534,6 @@ export default function PublicOrder() {
 
           {receive === 'DELIVERY' && (
             <div className="mt">
-              <label className="field"><span>주문자 성명 *</span><input type="text" value={form.recipientName} onChange={(e) => set('recipientName', e.target.value)} required /></label>
-              <label className="field"><span>주문자 전화번호 *</span><input type="tel" value={form.recipientPhone} onChange={(e) => set('recipientPhone', e.target.value)} required placeholder="010-0000-0000" /></label>
               <div className="field"><span style={{ fontWeight: 600, display: 'block', marginBottom: 4 }}>주소 *</span>
                 <div className="row">
                   <input type="text" value={form.zipcode} readOnly placeholder="우편번호" style={{ width: 110 }} />

@@ -192,8 +192,6 @@ public class PublicOrderService {
                 .order(OrderMapper.toMyOrder(order, groupBuy.isAcceptingOrders(now)))
                 .nickname(order.getNickname())
                 .unitAddress(order.getUnitAddress())
-                .recipientName(order.getRecipientName())
-                .recipientPhone(PhoneNumbers.format(order.getRecipientPhone()))
                 .zipcode(order.getZipcode())
                 .address(order.getAddress())
                 .addressDetail(order.getAddressDetail())

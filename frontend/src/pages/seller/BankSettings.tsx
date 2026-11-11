@@ -24,7 +24,7 @@ function toForm(bankName: string, fileType: StatementType, v: BankHeaderValues |
   }
 }
 
-/** 은행 거래내역 헤더(컬럼) 설정 (은행마다 헤더(컬럼)명이 달라서) + 저장된 입금자 별칭 관리 */
+/** "입금 대조 은행 설정" 화면 (2026-11-09 이름 바꿈, 전에는 "은행 거래내역 헤더(컬럼) 설정"): 은행별 헤더(컬럼)명 (은행마다 달라서) + 저장된 입금자 별칭 관리 */
 export default function BankSettings() {
   const [banks, setBanks] = useState<BankHeaderView[]>([])
   const [aliases, setAliases] = useState<Alias[]>([])
@@ -87,7 +87,7 @@ export default function BankSettings() {
 
   return (
     <div>
-      <h1>은행 거래내역 헤더(컬럼) 설정</h1>
+      <h1>입금 대조 은행 설정</h1>
       <div className="card">
         <div className="row between">
           <h3>은행 종류별 헤더(컬럼)명</h3>

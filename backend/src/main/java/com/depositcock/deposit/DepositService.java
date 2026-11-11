@@ -44,6 +44,7 @@ import com.depositcock.groupbuy.GroupBuy;
 import com.depositcock.groupbuy.GroupBuyService;
 import com.depositcock.order.CustomerOrder;
 import com.depositcock.order.CustomerOrderRepository;
+import com.depositcock.seller.FeatureAccess;
 import com.depositcock.order.DepositConfirmation;
 import com.depositcock.order.DepositConfirmationRepository;
 import com.depositcock.order.OrderSource;
@@ -72,6 +73,7 @@ public class DepositService {
     private final BankHeaders bankHeaders;
     private final DepositPools pools;
     private final BankStatementReader reader;
+    private final FeatureAccess featureAccess;
     private final Clock clock;
 
     // ---------- 업로드 ----------
@@ -93,8 +95,17 @@ public class DepositService {
         }
         BankHeaderView bank = bankHeaders.find(sellerId, name, type)
                 .orElseThrow(() -> new ApiException(ErrorCode.STATEMENT_BANK_TYPE_MISSING, name, type.getLabel()));
-        ParsedStatement parsed = reader.read(file.getOriginalFilename(), content, bank.values().toMapping(),
-                bank.values().accountLabel(), password);
+        ParsedStatement parsed;
+        try {
+            parsed = reader.read(file.getOriginalFilename(), content, bank.values().toMapping(),
+                    bank.values().accountLabel(), password);
+        } catch (ApiException e) {
+            // 관리자가 화면 캡처로 올리기를 꺼 뒀으면 캡처를 권하지 않는 안내로 (2026-11-09)
+            if (e.getCode() == ErrorCode.STATEMENT_PDF_NO_TEXT && !featureAccess.depositCaptureOpen()) {
+                throw new ApiException(ErrorCode.STATEMENT_PDF_NO_TEXT_FILE_ONLY);
+            }
+            throw e;
+        }
         if (!parsed.ok()) {
             // 은행 헤더 설정과 파일이 안 맞으면 대조를 멈춘다 (2026-10-27 사용자 결정)
             throw new ApiException(ErrorCode.STATEMENT_HEADER_MISMATCH, name + " " + type.getLabel(),
@@ -594,7 +605,7 @@ public class DepositService {
 
     // ---------- 은행 헤더(컬럼) 설정 ----------
 
-    /** 은행 헤더(컬럼) 설정 화면: 은행별 헤더(컬럼)명 + 입금자 별칭 */
+    /** 입금 대조 은행 설정 화면: 은행별 헤더(컬럼)명 + 입금자 별칭 */
     public BankSettingsResponse bankSettings(Long sellerId) {
         return new BankSettingsResponse(bankHeaders.list(sellerId), aliases(sellerId));
     }

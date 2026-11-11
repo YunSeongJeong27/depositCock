@@ -85,6 +85,6 @@ public class AuthController {
     }
 
     private MeResponse toMe(Seller seller) {
-        return MeResponse.of(seller, LocalDateTime.now(clock), featureAccess.commentsAllowed(seller));
+        return MeResponse.of(seller, LocalDateTime.now(clock), featureAccess.commentsAllowed(seller), featureAccess.depositCaptureOpen());
     }
 }

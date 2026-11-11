@@ -27,12 +27,11 @@ public final class OrderDtos {
                                    @Max(value = 9999, message = "QUANTITY_RANGE") int quantity) {
     }
 
-    /** 요청 중 배송 칸 (주문서·판매자 주문 변경 공통, OrderRules.delivery 가 읽는다) */
+    /**
+     * 요청 중 배송 칸 (주문서·판매자 주문 변경 공통, OrderRules.delivery 가 읽는다).
+     * 수령인 이름·전화번호는 받지 않는다: 판매자가 입금자명·휴대폰 번호로 보낸다 (2026-11-10 사용자 결정, 고객 손이 덜 가게)
+     */
     public interface DeliveryInput {
-        String recipientName();
-
-        String recipientPhone();
-
         String zipcode();
 
         String address();
@@ -49,8 +48,6 @@ public final class OrderDtos {
             ReceiveMethod receiveMethod,
             Long pickupPointId,
             PaymentMethod paymentMethod,
-            @Size(max = 50, message = "RECIPIENT_NAME_TOO_LONG") String recipientName,
-            @Size(max = 20, message = "RECIPIENT_PHONE_TOO_LONG") String recipientPhone,
             @Size(max = 10, message = "ZIPCODE_TOO_LONG") String zipcode,
             @Size(max = 300, message = "ADDRESS_TOO_LONG") String address,
             @Size(max = 300, message = "ADDRESS_DETAIL_TOO_LONG") String addressDetail,
@@ -147,8 +144,7 @@ public final class OrderDtos {
     @Builder
     public record Prefill(String phone, String depositorName, String nickname, String unitAddress,
                           ReceiveMethod receiveMethod, Long pickupPointId, PaymentMethod paymentMethod,
-                          String recipientName, String recipientPhone, String zipcode, String address,
-                          String addressDetail, boolean limited) {
+                          String zipcode, String address, String addressDetail, boolean limited) {
     }
 
     @Builder
@@ -198,8 +194,8 @@ public final class OrderDtos {
      * 바꾼 경우에도 모든 칸이 이번 요청에 적은 값으로 바뀌므로, 요청한 사람이 적지 않은 값(바뀌기 전 주소 등)은 들어 있지 않다
      */
     @Builder
-    public record FinalOrder(MyOrder order, String nickname, String unitAddress, String recipientName,
-                             String recipientPhone, String zipcode, String address, String addressDetail) {
+    public record FinalOrder(MyOrder order, String nickname, String unitAddress, String zipcode, String address,
+                             String addressDetail) {
     }
 
     // ---------- 판매자 ----------
@@ -220,8 +216,6 @@ public final class OrderDtos {
             ReceiveMethod receiveMethod,
             Long pickupPointId,
             String pickupPointName,
-            String recipientName,
-            String recipientPhone,
             String zipcode,
             String address,
             String addressDetail,
@@ -280,8 +274,6 @@ public final class OrderDtos {
             @Size(max = 50, message = "DEPOSITOR_NAME_TOO_LONG") String depositorName,
             @Size(max = 200, message = "NICKNAME_TOO_LONG") String nickname,
             @Size(max = 50, message = "UNIT_ADDRESS_TOO_LONG") String unitAddress,
-            @Size(max = 50, message = "RECIPIENT_NAME_TOO_LONG") String recipientName,
-            @Size(max = 20, message = "RECIPIENT_PHONE_TOO_LONG") String recipientPhone,
             @Size(max = 10, message = "ZIPCODE_TOO_LONG") String zipcode,
             @Size(max = 300, message = "ADDRESS_TOO_LONG") String address,
             @Size(max = 300, message = "ADDRESS_DETAIL_TOO_LONG") String addressDetail) implements DeliveryInput {

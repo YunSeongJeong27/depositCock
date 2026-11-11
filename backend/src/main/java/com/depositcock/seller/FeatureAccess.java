@@ -16,6 +16,8 @@ import org.springframework.transaction.annotation.Transactional;
  * 사용 가능 = 전체 공개(app_setting) 이거나 판매자별 허용(seller.comment_feature_enabled). 둘 다 기본 꺼짐.
  * 주문 링크·입금 대조 등 나머지 기능은 이 설정과 상관없이 쓴다.
  * 새 판매자 회원가입을 받을지도 관리자가 정한다 (2026-11-09 사용자 요청). 끄기 전까지는 받는다.
+ * 입금 대조의 "은행앱 화면 캡처로 올리기"도 관리자가 켜고 끈다 (2026-11-09 사용자 요청). 끄기 전까지는 쓴다.
+ * 댓글 캡처는 댓글 주문 기능 설정을 따르고 이 설정과 상관없다.
  */
 @Service
 @RequiredArgsConstructor
@@ -23,6 +25,7 @@ public class FeatureAccess {
 
     static final String COMMENT_FEATURE_OPEN = "comment_feature_open";
     static final String SIGNUP_OPEN = "signup_open";
+    static final String DEPOSIT_CAPTURE_OPEN = "deposit_capture_open";
 
     private final JdbcTemplate jdbc;
     private final SellerRepository sellerRepository;
@@ -45,6 +48,22 @@ public class FeatureAccess {
     @Transactional
     public void setSignupOpen(boolean open, LocalDateTime now) {
         saveSetting(SIGNUP_OPEN, open, now);
+    }
+
+    /** 입금 대조 "은행앱 화면 캡처로 올리기"를 쓸 수 있는지 */
+    public boolean depositCaptureOpen() {
+        return setting(DEPOSIT_CAPTURE_OPEN, true);
+    }
+
+    @Transactional
+    public void setDepositCaptureOpen(boolean open, LocalDateTime now) {
+        saveSetting(DEPOSIT_CAPTURE_OPEN, open, now);
+    }
+
+    public void requireDepositCapture() {
+        if (!depositCaptureOpen()) {
+            throw new ApiException(ErrorCode.DEPOSIT_CAPTURE_CLOSED);
+        }
     }
 
     private boolean setting(String key, boolean defaultValue) {

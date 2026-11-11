@@ -53,6 +53,7 @@ public enum ErrorCode {
     ADMIN_CANNOT_DELETE(BAD_REQUEST, "관리자 계정은 삭제할 수 없습니다."),
     ADMIN_CANNOT_WITHDRAW(BAD_REQUEST, "관리자 계정은 탈퇴할 수 없습니다."),
     ADMIN_EMAIL_FIXED(BAD_REQUEST, "관리자 계정 이메일은 여기서 바꿀 수 없습니다. 서버 설정 APP_ADMIN_EMAIL 로 정합니다."),
+    DEPOSIT_CAPTURE_CLOSED(FORBIDDEN, "은행앱 화면 캡처로 올리기는 지금 쓸 수 없습니다. 거래내역 파일로 올려 주세요."),
     COMMENT_FEATURE_CLOSED(FORBIDDEN, "댓글 주문 기능은 아직 열려 있지 않습니다. 주문 링크로 주문을 받아 주세요."),
 
     // ---- 공구 설정 ----
@@ -82,7 +83,7 @@ public enum ErrorCode {
     DEPOSITOR_NAME_REQUIRED(BAD_REQUEST, "입금자명을 입력해 주세요."),
     PRODUCT_NOT_FOUND(BAD_REQUEST, "상품을 찾을 수 없습니다."),
     QUANTITY_REQUIRED(BAD_REQUEST, "상품 수량을 1개 이상 선택해 주세요."),
-    DELIVERY_INFO_REQUIRED(BAD_REQUEST, "배송을 고르면 주문자 성명, 주문자 전화번호, 주소를 모두 입력해야 합니다."),
+    DELIVERY_INFO_REQUIRED(BAD_REQUEST, "배송을 고르면 주소를 입력해야 합니다."),
     REORDER_NAME_MISMATCH(BAD_REQUEST, "이 번호로 주문 확정 전인 주문이 있습니다. 수정하려면 그 주문의 입금자명을 똑같이 적어 주세요. "
             + "입금자명을 바꾸려면 판매자에게 문의해 주세요."),
     SOLD_OUT(CONFLICT, "'%s' 상품이 품절되었습니다."),
@@ -144,14 +145,16 @@ public enum ErrorCode {
     CANCELLED_CANNOT_EDIT(BAD_REQUEST, "취소된 주문은 바꿀 수 없습니다."),
     PICKED_UP_CANNOT_EDIT(BAD_REQUEST, "수령 완료된 주문은 바꿀 수 없습니다."),
     PAID_CANNOT_EDIT(BAD_REQUEST, "입금 확정된 주문입니다. 바꾸려면 먼저 입금 확정을 취소해 주세요."),
-    DELIVERY_INFO_REQUIRED_FOR_CHANGE(BAD_REQUEST, "배송으로 바꾸려면 주문자 성명, 주문자 전화번호, 주소를 모두 입력해야 합니다."),
+    DELIVERY_INFO_REQUIRED_FOR_CHANGE(BAD_REQUEST, "배송으로 바꾸려면 주소를 입력해야 합니다."),
     QUANTITY_REQUIRED_FOR_CHANGE(BAD_REQUEST, "상품 수량을 1개 이상 넣어 주세요. 주문을 없애려면 주문 취소를 눌러 주세요."),
     DELETE_NOTHING_SELECTED(BAD_REQUEST, "지울 주문을 골라 주세요."),
     DELETE_ONLY_FINISHED(BAD_REQUEST, "완료된 주문만 지울 수 있습니다. 아직 처리 중인 주문: %s"),
 
     // ---- 입금 대조 ----
-    STATEMENT_HEADER_MISMATCH(BAD_REQUEST, "거래내역 헤더 설정이 잘못됐습니다. [은행 헤더(컬럼) 설정] 메뉴에서 '%s'의 헤더(컬럼)명을 파일에 맞게 고친 뒤 다시 올려 주세요. 파일에서 못 찾은 헤더(컬럼)명: %s"),
+    STATEMENT_HEADER_MISMATCH(BAD_REQUEST, "거래내역 헤더 설정이 잘못됐습니다. [입금 대조 은행 설정] 메뉴에서 '%s'의 헤더(컬럼)명을 파일에 맞게 고친 뒤 다시 올려 주세요. 파일에서 못 찾은 헤더(컬럼)명: %s"),
     STATEMENT_PDF_NO_TEXT(BAD_REQUEST, "글자를 읽을 수 없는 PDF입니다. 글자가 그림으로 된 PDF는 읽지 못합니다. 은행 앱 화면 캡처로 올리거나 엑셀로 받아 올려 주세요."),
+    /** 관리자가 화면 캡처로 올리기를 꺼 둔 때의 같은 안내 (캡처를 권하지 않음, 2026-11-09) */
+    STATEMENT_PDF_NO_TEXT_FILE_ONLY(BAD_REQUEST, "글자를 읽을 수 없는 PDF입니다. 글자가 그림으로 된 PDF는 읽지 못합니다. 엑셀로 받아 올려 주세요."),
     // 암호 걸린 PDF·엑셀: 올리기 화면의 파일 비밀번호로 연다 (2026-10-27 사용자 요청)
     STATEMENT_FILE_PASSWORD_REQUIRED(BAD_REQUEST, "암호가 걸린 파일입니다. 파일 비밀번호를 입력하고 다시 올려 주세요."),
     STATEMENT_FILE_PASSWORD_WRONG(BAD_REQUEST, "파일 비밀번호가 맞지 않습니다. 다시 확인해 주세요."),
@@ -176,7 +179,7 @@ public enum ErrorCode {
     REFUNDED_CANNOT_UNCONFIRM(BAD_REQUEST, "환불 완료된 주문은 입금 확정을 취소할 수 없습니다."),
     ALIAS_NOT_FOUND(NOT_FOUND, "별칭을 찾을 수 없습니다."),
     BANK_HEADER_NOT_FOUND(NOT_FOUND, "은행 헤더(컬럼) 설정을 찾을 수 없습니다."),
-    STATEMENT_BANK_TYPE_MISSING(BAD_REQUEST, "'%s' %s 헤더(컬럼)명이 아직 없습니다. [은행 헤더(컬럼) 설정]에서 추가한 뒤 다시 올려 주세요."),
+    STATEMENT_BANK_TYPE_MISSING(BAD_REQUEST, "'%s' %s 헤더(컬럼)명이 아직 없습니다. [입금 대조 은행 설정]에서 추가한 뒤 다시 올려 주세요."),
     FILE_TYPE_REQUIRED(BAD_REQUEST, "파일 종류를 골라 주세요."),
 
     // ---- 댓글 집계 ----
@@ -234,8 +237,6 @@ public enum ErrorCode {
     DEPOSITOR_NAME_TOO_LONG(BAD_REQUEST, "입금자명이 너무 깁니다."),
     NICKNAME_TOO_LONG(BAD_REQUEST, "닉네임이 너무 깁니다."),
     UNIT_ADDRESS_TOO_LONG(BAD_REQUEST, "동·호수는 50자까지 입력할 수 있습니다."),
-    RECIPIENT_NAME_TOO_LONG(BAD_REQUEST, "주문자 성명은 50자까지 입력할 수 있습니다."),
-    RECIPIENT_PHONE_TOO_LONG(BAD_REQUEST, "주문자 전화번호가 너무 깁니다."),
     ZIPCODE_TOO_LONG(BAD_REQUEST, "우편번호가 너무 깁니다."),
     ADDRESS_TOO_LONG(BAD_REQUEST, "주소는 300자까지 입력할 수 있습니다."),
     ADDRESS_DETAIL_TOO_LONG(BAD_REQUEST, "상세주소는 300자까지 입력할 수 있습니다."),
