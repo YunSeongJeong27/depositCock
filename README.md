@@ -87,6 +87,10 @@ cd ../frontend
 npm run typecheck    # 타입 검사
 ```
 
+## 자동 테스트 (CI)
+
+`dev`·`main` 으로 PR 을 올리거나 push 하면 GitHub Actions(`.github/workflows/ci.yml`)가 백엔드 테스트와 프론트 타입 검사·빌드를 자동으로 돌리고, 결과를 PR 화면에 표시합니다.
+
 ## 운영 배포 (요약)
 
 ```bash
