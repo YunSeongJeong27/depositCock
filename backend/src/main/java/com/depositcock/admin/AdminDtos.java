@@ -21,10 +21,11 @@ public final class AdminDtos {
     @Builder
     public record AdminSellerRow(
             Long id,
+            String loginId,
             String email,
-            String displayName,
-            /** 휴대폰 번호 010-1234-5678 모양, 없으면 null (2026-11-09) */
+            /** 010-1234-5678 모양 (없으면 null) */
             String phone,
+            String displayName,
             Role role,
             Plan plan,
             LocalDateTime trialEndsAt,
@@ -55,8 +56,9 @@ public final class AdminDtos {
             Boolean commentFeatureEnabled) {
     }
 
-    /** 판매자 정보 고치기 (관리자, 2026-11-09). 새 비밀번호는 바꿀 때만, 휴대폰 번호는 비우면 지움 */
+    /** 판매자 정보 고치기 (관리자, 2026-11-09, 2026-11-20 아이디 추가). 새 비밀번호는 바꿀 때만, 휴대폰 번호는 비우면 지움 */
     public record SellerInfoRequest(
+            @NotBlank(message = "LOGIN_ID_REQUIRED") @Size(max = 30, message = "LOGIN_ID_TOO_LONG") String loginId,
             @NotBlank(message = "EMAIL_REQUIRED") @Email(message = "EMAIL_INVALID")
             @Size(max = 255, message = "EMAIL_TOO_LONG") String email,
             @NotBlank(message = "SELLER_NAME_REQUIRED") @Size(max = 100, message = "SELLER_NAME_TOO_LONG") String displayName,

@@ -1,9 +1,10 @@
 import { useEffect, useState, type FormEvent } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { api, errorMessage } from '../../api'
 import { useAuth } from '../../auth'
 import { ErrorBox } from '../../components/Ui'
 import { accountText as T } from '../../texts/account'
+import PhoneChange from './PhoneChange'
 import type { Me, NotificationType } from '../../types'
 
 /** 알림 설정 (2026-10-19). 처음에는 꼭 필요한 것만 켜져 있다 (서버 NotificationType 기본값) */
@@ -23,7 +24,7 @@ const SCREEN_ITEMS: { type: NotificationType; label: string; note: string }[] = 
 
 export default function Profile() {
   const { me, setMe } = useAuth()
-  const [form, setForm] = useState({ displayName: '', phone: '', defaultBankName: '', defaultAccountNumber: '', defaultAccountHolder: '' })
+  const [form, setForm] = useState({ displayName: '', defaultBankName: '', defaultAccountNumber: '', defaultAccountHolder: '' })
   const [error, setError] = useState<string | null>(null)
   const [saved, setSaved] = useState(false)
   const [notifyError, setNotifyError] = useState<string | null>(null)
@@ -63,7 +64,7 @@ export default function Profile() {
   const meId = me?.id
   useEffect(() => {
     if (me) {
-      setForm({ displayName: me.displayName, phone: me.phone ?? '', defaultBankName: me.defaultBankName ?? '', defaultAccountNumber: me.defaultAccountNumber ?? '', defaultAccountHolder: me.defaultAccountHolder ?? '' })
+      setForm({ displayName: me.displayName, defaultBankName: me.defaultBankName ?? '', defaultAccountNumber: me.defaultAccountNumber ?? '', defaultAccountHolder: me.defaultAccountHolder ?? '' })
     }
   }, [meId])
 
@@ -84,19 +85,16 @@ export default function Profile() {
     <div>
       <h1>내 정보</h1>
       <div className="card">
-        <div><b>{me.email}</b></div>
+        <div><b>{me.loginId}</b> <span className="muted small">· {me.email}</span></div>
         <div className="muted small">
           플랜: {me.plan === 'TRIAL' ? `무료 체험 · ${me.trialEndsAt.substring(0, 10)}까지` : `유료 · ${me.paidUntil ? me.paidUntil + '까지' : '만료일 없음'}`}
           {me.expired && <span style={{ color: 'var(--danger)' }}> · 기간 만료</span>}
         </div>
+        <div className="small mt"><Link to="/find-account?tab=change">비밀번호 변경</Link></div>
       </div>
       <form className="card" onSubmit={submit}>
         <label className="field"><span>판매자 이름</span>
           <input type="text" value={form.displayName} onChange={(e) => setForm({ ...form, displayName: e.target.value })} required />
-        </label>
-        <label className="field"><span>휴대폰 번호</span>
-          <input type="tel" value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} placeholder="010-0000-0000" />
-          <span className="muted small" style={{ fontWeight: 400 }}>{T.sellerPhoneHint}</span>
         </label>
         <h3>기본 입금 계좌</h3>
         <p className="muted small">{T.defaultAccountHint}</p>
@@ -110,6 +108,7 @@ export default function Profile() {
         {saved && <div className="success-box">저장했습니다.</div>}
         <button className="btn primary mt">저장</button>
       </form>
+      <PhoneChange />
       <div className="card">
         <h3>알림 설정</h3>
         <div className="muted small">{T.notifyHelp}</div>

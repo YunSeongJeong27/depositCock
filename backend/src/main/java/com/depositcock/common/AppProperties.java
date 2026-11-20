@@ -14,6 +14,7 @@ public record AppProperties(
         int jwtTtlHours,
         boolean cookieSecure,
         int trialDays,
+        String adminLoginId,
         String adminEmail,
         String adminPassword,
         int publicRateLimitPerMinute,

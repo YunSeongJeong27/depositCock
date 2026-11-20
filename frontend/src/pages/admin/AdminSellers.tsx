@@ -6,6 +6,8 @@ import type { Plan, Role } from '../../types'
 
 interface Row {
   id: number
+  /** 로그인 아이디 (2026-11-20) */
+  loginId: string
   email: string
   displayName: string
   /** 휴대폰 번호 010-1234-5678 모양, 없으면 null (2026-11-09) */
@@ -43,11 +45,13 @@ const emailWithBreak = (email: string) => {
 
 /**
  * 판매자 계정 만들기·정보 수정 칸 (2026-11-09). 메일 등으로 요청받은 계정을 관리자가 직접 만들고, 잘못 넣은 정보를 고친다.
- * 수정할 때 비밀번호는 바꿀 때만 적는다. 관리자 계정 이메일은 서버 설정으로 정해서 못 바꾼다
+ * 2026-11-20: 아이디 칸 추가, 관리자 계정도 아이디·이메일까지 바꿈. 수정할 때 비밀번호는 바꿀 때만 적는다.
+ * 지금 비밀번호는 일방향 해시로만 저장해서 보여 줄 수 없다 (칸 아래 안내)
  */
 function SellerInfoForm({ target, onDone, onClose }: { target: Row | null; onDone: (message: string) => void; onClose: () => void }) {
   const [form, setForm] = useState({
-    email: target?.email ?? '', password: '', displayName: target?.displayName ?? '', phone: target?.phone ?? '',
+    loginId: target?.loginId ?? '', email: target?.email ?? '', password: '', displayName: target?.displayName ?? '',
+    phone: target?.phone ?? '',
   })
   const [error, setError] = useState<string | null>(null)
   const [busy, setBusy] = useState(false)
@@ -57,7 +61,6 @@ function SellerInfoForm({ target, onDone, onClose }: { target: Row | null; onDon
   useEffect(() => {
     ref.current?.scrollIntoView({ block: 'nearest', behavior: 'smooth' })
   }, [])
-  const adminEmail = target?.role === 'ADMIN'
 
   async function submit(e: FormEvent) {
     e.preventDefault()
@@ -66,7 +69,7 @@ function SellerInfoForm({ target, onDone, onClose }: { target: Row | null; onDon
     try {
       if (target) {
         await api.put(`/api/admin/sellers/${target.id}/info`,
-          { email: form.email, displayName: form.displayName, phone: form.phone, newPassword: form.password || null })
+          { loginId: form.loginId, email: form.email, displayName: form.displayName, phone: form.phone, newPassword: form.password || null })
         onDone(T.sellerInfoSaved)
       } else {
         await api.post('/api/admin/sellers', form)
@@ -84,13 +87,18 @@ function SellerInfoForm({ target, onDone, onClose }: { target: Row | null; onDon
       <h3>{target ? '판매자 정보 수정' : '판매자 계정 만들기'}</h3>
       <p className="muted small">{target ? T.editSellerHelp : T.createSellerHelp}</p>
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '0 12px' }}>
-        <label className="field"><span>이메일</span>
-          <input type="email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} required
-            disabled={adminEmail} title={adminEmail ? T.adminEmailFixed : undefined} />
+        <label className="field"><span>아이디</span>
+          <input type="text" value={form.loginId} onChange={(e) => setForm({ ...form, loginId: e.target.value })} required
+            autoCapitalize="none" autoComplete="off" />
+          <span className="muted small" style={{ fontWeight: 400 }}>{T.loginIdHint}</span>
         </label>
         <label className="field"><span>{target ? '새 비밀번호 (바꿀 때만)' : '비밀번호 (8자 이상)'}</span>
           <input type="text" minLength={8} value={form.password} onChange={(e) => setForm({ ...form, password: e.target.value })}
             required={!target} autoComplete="off" />
+          {target && <span className="muted small" style={{ fontWeight: 400 }}>{T.adminPasswordNote}</span>}
+        </label>
+        <label className="field"><span>이메일</span>
+          <input type="email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} required />
         </label>
         <label className="field"><span>판매자 이름</span>
           <input type="text" value={form.displayName} onChange={(e) => setForm({ ...form, displayName: e.target.value })} required />
@@ -255,7 +263,7 @@ export default function AdminSellers() {
               const update = (patch: Partial<Row>) => setEditing((e) => ({ ...e, [row.id]: { ...r, ...patch } }))
               return (
                 <tr key={row.id}>
-                  <td className="stack-title">{row.displayName}<div className="muted small">{emailWithBreak(row.email)}{row.role === 'ADMIN' && ' · 관리자'}</div>
+                  <td className="stack-title">{row.displayName}<div className="muted small">{row.loginId} · {emailWithBreak(row.email)}{row.role === 'ADMIN' && ' · 관리자'}</div>
                     <div className="muted small">가입 {row.createdAt.substring(0, 10)} · 공구 {row.groupBuyCount}개</div></td>
                   <td data-label="휴대폰" style={{ whiteSpace: 'nowrap' }}>{row.phone ?? <span className="muted">-</span>}</td>
                   <td data-label="플랜">

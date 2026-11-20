@@ -2,6 +2,7 @@ package com.depositcock.support;
 
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -33,6 +34,9 @@ public abstract class IntegrationTest {
 
     @Autowired
     protected ObjectMapper objectMapper;
+
+    @Autowired
+    protected TestMailbox mailbox;
 
     @Autowired
     private org.springframework.jdbc.core.JdbcTemplate settingsJdbc;
@@ -74,17 +78,49 @@ public abstract class IntegrationTest {
         return body.isEmpty() ? objectMapper.nullNode() : objectMapper.readTree(body);
     }
 
-    /** 가입 후 로그인 쿠키를 돌려준다. */
+    /** 이메일 → 가입할 때 쓴 아이디 (로그인은 아이디로, 2026-11-20). 테스트 설정의 관리자는 아이디 admin */
+    private static final Map<String, String> LOGIN_IDS = new ConcurrentHashMap<>(Map.of("admin@test.local", "admin"));
+
+    /** 아이디 규칙(영문 소문자로 시작, 4~20자)에 맞는 테스트마다 다른 아이디 */
+    protected static synchronized String uniqueLoginId() {
+        sequence++;
+        return "t" + Long.toString(System.nanoTime(), 36) + sequence;
+    }
+
+    protected static String loginIdOf(String email) {
+        return LOGIN_IDS.get(email);
+    }
+
+    /** 가입 후 로그인 쿠키를 돌려준다. 아이디는 새로 만들고 휴대폰은 010-1234-5678 */
     protected Cookie signup(String email) throws Exception {
+        return signup(uniqueLoginId(), email, "010-1234-5678");
+    }
+
+    /** 이메일 인증번호 받기 → 확인 → 가입 */
+    protected Cookie signup(String loginId, String email, String phone) throws Exception {
+        verifySignupEmail(email);
         MvcResult result = mvc.perform(post("/api/auth/signup").contentType(MediaType.APPLICATION_JSON)
-                        .content(json(Map.of("email", email, "password", "password123", "displayName", "공구장", "phone", "010-1234-5678"))))
+                        .content(json(Map.of("loginId", loginId, "password", "password123", "displayName", "공구장",
+                                "email", email, "phone", phone))))
                 .andExpect(status().isOk()).andReturn();
+        LOGIN_IDS.put(email, loginId);
         return result.getResponse().getCookie("DC_TOKEN");
     }
 
-    protected Cookie login(String email, String password) throws Exception {
+    /** 가입 인증번호를 받아(TestMailbox 에서 읽음) 확인까지 한다 */
+    protected void verifySignupEmail(String email) throws Exception {
+        mvc.perform(post("/api/auth/signup/email-code").contentType(MediaType.APPLICATION_JSON)
+                .content(json(Map.of("email", email)))).andExpect(status().isOk());
+        mvc.perform(post("/api/auth/signup/email-verify").contentType(MediaType.APPLICATION_JSON)
+                        .content(json(Map.of("email", email, "code", mailbox.lastCodeTo(email)))))
+                .andExpect(status().isOk());
+    }
+
+    /** 아이디로 로그인. 가입 도우미로 만든 판매자는 이메일을 넘겨도 된다 (그 이메일의 아이디로 바꿔 보냄) */
+    protected Cookie login(String emailOrLoginId, String password) throws Exception {
+        String loginId = LOGIN_IDS.getOrDefault(emailOrLoginId, emailOrLoginId);
         MvcResult result = mvc.perform(post("/api/auth/login").contentType(MediaType.APPLICATION_JSON)
-                        .content(json(Map.of("email", email, "password", password))))
+                        .content(json(Map.of("loginId", loginId, "password", password))))
                 .andExpect(status().isOk()).andReturn();
         return result.getResponse().getCookie("DC_TOKEN");
     }

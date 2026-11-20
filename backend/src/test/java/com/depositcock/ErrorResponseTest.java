@@ -32,7 +32,8 @@ class ErrorResponseTest extends IntegrationTest {
 
     @Test
     void oneValidationErrorAnswersWithItsCode() throws Exception {
-        mvc.perform(withJson(post("/api/auth/signup"), Map.of("email", uniqueEmail(), "password", "short", "displayName", "공구장", "phone", "010-1234-5678")))
+        mvc.perform(withJson(post("/api/auth/signup"), Map.of("loginId", uniqueLoginId(), "email", uniqueEmail(),
+                        "phone", "010-1234-5678", "password", "short", "displayName", "공구장")))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.code").value("PASSWORD_LENGTH"))
                 .andExpect(jsonPath("$.detail").value(ErrorCode.PASSWORD_LENGTH.message()));
@@ -40,7 +41,8 @@ class ErrorResponseTest extends IntegrationTest {
 
     @Test
     void severalValidationErrorsAreJoinedWithoutFieldNames() throws Exception {
-        mvc.perform(withJson(post("/api/auth/signup"), Map.of("email", uniqueEmail(), "password", "short", "displayName", "", "phone", "010-1234-5678")))
+        mvc.perform(withJson(post("/api/auth/signup"), Map.of("loginId", uniqueLoginId(), "email", uniqueEmail(),
+                        "phone", "010-1234-5678", "password", "short", "displayName", "")))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.code").value("INVALID_INPUT"))
                 .andExpect(jsonPath("$.detail").value(allOf(containsString(ErrorCode.PASSWORD_LENGTH.message()),
@@ -52,7 +54,7 @@ class ErrorResponseTest extends IntegrationTest {
         mvc.perform(post("/api/auth/login").contentType(MediaType.APPLICATION_JSON).content("{"))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.code").value("INVALID_REQUEST_BODY"));
-        mvc.perform(withJson(post("/api/auth/login"), Map.of("email", uniqueEmail(), "password", "password123")))
+        mvc.perform(withJson(post("/api/auth/login"), Map.of("loginId", uniqueLoginId(), "password", "password123")))
                 .andExpect(status().isUnauthorized())
                 .andExpect(jsonPath("$.code").value("LOGIN_FAILED"));
     }

@@ -5,6 +5,7 @@ import { SiteFooter } from './components/Ui'
 import Home from './pages/Home'
 import Login from './pages/Login'
 import Signup from './pages/Signup'
+import FindAccount from './pages/FindAccount'
 import Privacy from './pages/Privacy'
 import Terms from './pages/Terms'
 import GroupBuyList from './pages/seller/GroupBuyList'
@@ -31,6 +32,7 @@ export default function App() {
         <Route path="/" element={<Home />} />
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<Signup />} />
+        <Route path="/find-account" element={<FindAccount />} />
         <Route path="/privacy" element={<Privacy />} />
         <Route path="/terms" element={<Terms />} />
         <Route path="/g/:token" element={<PublicOrder />} />

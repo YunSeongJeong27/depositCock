@@ -23,6 +23,7 @@ import org.springframework.web.filter.OncePerRequestFilter;
  *   app.sensitive-rate-limit-per-10-minutes 회
  *       — 휴대폰 번호를 하나씩 넣어보는 시도를 막는다 (내 주문 찾기는 휴대폰 전체 번호, 취소·환불 신청은 번호 + 입금자명).
  *       공구별로 따로 세는 이유: 휴대폰 망은 여러 사람이 IP 하나를 같이 쓰는 경우가 많아서, 다른 공구 고객끼리 한도를 나눠 쓰지 않게.</li>
+ *   <li>판매자 계정 인증번호·찾기 (accountCheck): 같은 10분 한도</li>
  * </ul>
  * 프록시 뒤에서는 server.forward-headers-strategy 설정으로 실제 IP 가 getRemoteAddr 에 들어온다.
  */
@@ -56,13 +57,23 @@ public class RateLimitFilter extends OncePerRequestFilter {
             ProblemWriter.write(response, ErrorCode.TOO_MANY_REQUESTS_ERROR);
             return;
         }
-        if ((uri.endsWith("/identify") || uri.endsWith("/cancel") || uri.endsWith("/refund-request"))
+        if ((uri.endsWith("/identify") || uri.endsWith("/cancel") || uri.endsWith("/refund-request")
+                || accountCheck(uri))
                 && !allow(sensitive, ip + "|" + groupBuyPath(uri), now, TEN_MINUTES,
                 properties.sensitiveRateLimitPer10Minutes())) {
             ProblemWriter.write(response, ErrorCode.TOO_MANY_CHECKS);
             return;
         }
         chain.doFilter(request, response);
+    }
+
+    /**
+     * 인증번호 받기·확인, 아이디 찾기, 임시 비밀번호·비밀번호 변경 (2026-11-20): 메일을 마구 보내게 하거나
+     * 휴대폰·이메일·인증번호를 하나씩 넣어 보는 시도를 막는다. 가입·비밀번호가 따로 세어진다 (경로 앞부분 기준)
+     */
+    static boolean accountCheck(String uri) {
+        return uri.startsWith("/api/auth/") && (uri.endsWith("/email-code") || uri.endsWith("/email-verify")
+                || uri.endsWith("/find-login-id") || uri.endsWith("/password/reset") || uri.endsWith("/password/change"));
     }
 
     /** /api/public/g/{토큰}/identify → /api/public/g/{토큰} */

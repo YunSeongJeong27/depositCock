@@ -72,6 +72,10 @@ input[type=date].date-compact { width: 150px; padding: 8px; }
 
 label.field { display: block; margin-bottom: 12px; font-size: 0.92rem; }
 label.field > span { display: block; margin-bottom: 4px; font-weight: 600; }
+/* 칸 옆에 버튼이 붙는 칸 (이메일 + 인증번호 받기 등, 2026-11-20): label 대신 div 로 감싸고 칸 이름은 label */
+div.field { margin-bottom: 12px; font-size: 0.92rem; }
+div.field > label { display: block; margin-bottom: 4px; font-weight: 600; }
+div.field > span { display: block; margin-top: 4px; }
 input[type=text], input[type=email], input[type=password], input[type=number], input[type=tel], input[type=url],
 input[type=datetime-local], input[type=date], select, textarea {
   width: 100%; padding: 10px 12px; border: 1px solid var(--line); border-radius: 8px; font-size: 1rem; background: #fff; color: var(--text);

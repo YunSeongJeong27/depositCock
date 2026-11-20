@@ -28,6 +28,10 @@ public class SellerService {
     private final FeatureAccess featureAccess;
     private final Clock clock;
 
+    /**
+     * 회원가입. 관리자가 회원가입을 꺼 두면 막는다 (2026-11-09).
+     * 이메일 인증 확인은 부르는 쪽(account.AccountService.signup)이 같은 트랜잭션에서 한다 (2026-11-20).
+     */
     @Transactional
     public Seller signup(SignupRequest request) {
         if (!featureAccess.signupOpen()) {
@@ -38,23 +42,28 @@ public class SellerService {
 
     /**
      * 판매자 계정 만들기: 회원가입, 관리자가 직접 만들기(2026-11-09, 회원가입을 꺼 둬도 됨). 가입한 날부터 무료 체험.
+     * 아이디(2026-11-20)·휴대폰·중복 검사를 여기서 먼저 해서, 잘못 적은 가입이 이메일 인증을 써 버리지 않게 한다.
      */
     @Transactional
     public Seller create(SignupRequest request) {
+        String loginId = requireLoginId(request.loginId());
+        String phone = requirePhone(request.phone());
         String email = normalizeEmail(request.email());
+        if (sellerRepository.existsByLoginId(loginId)) {
+            throw new ApiException(ErrorCode.LOGIN_ID_TAKEN);
+        }
         if (sellerRepository.existsByEmail(email)) {
             throw new ApiException(ErrorCode.EMAIL_TAKEN);
         }
-        String phone = requirePhone(request.phone());
         LocalDateTime now = LocalDateTime.now(clock);
-        Seller seller = new Seller(email, passwordEncoder.encode(request.password()), request.displayName().trim(),
-                Role.SELLER, now, now.plusDays(properties.trialDays()));
-        seller.setPhone(phone);
+        Seller seller = new Seller(loginId, email, phone, passwordEncoder.encode(request.password()),
+                request.displayName().trim(), Role.SELLER, now, now.plusDays(properties.trialDays()));
         return sellerRepository.save(seller);
     }
 
-    public Seller login(String email, String password) {
-        Seller seller = sellerRepository.findByEmail(normalizeEmail(email))
+    /** 아이디로 로그인 (2026-11-20, 전에는 이메일). 대문자로 적어도 된다 */
+    public Seller login(String loginId, String password) {
+        Seller seller = sellerRepository.findByLoginId(loginId.trim().toLowerCase(Locale.ROOT))
                 .orElseThrow(() -> new ApiException(ErrorCode.LOGIN_FAILED));
         if (!passwordEncoder.matches(password, seller.getPasswordHash())) {
             throw new ApiException(ErrorCode.LOGIN_FAILED);
@@ -67,6 +76,7 @@ public class SellerService {
                 .orElseThrow(() -> new ApiException(ErrorCode.LOGIN_REQUIRED));
     }
 
+    /** 내 정보 저장 (이름·기본 계좌). 휴대폰은 이메일 인증을 거쳐 따로 (account.AccountService.changePhone, 2026-11-20) */
     @Transactional
     public Seller updateProfile(Long sellerId, UpdateProfileRequest request) {
         Seller seller = get(sellerId);
@@ -74,9 +84,6 @@ public class SellerService {
         seller.setDefaultBankName(Texts.blankToNull(request.defaultBankName()));
         seller.setDefaultAccountNumber(Texts.blankToNull(request.defaultAccountNumber()));
         seller.setDefaultAccountHolder(Texts.blankToNull(request.defaultAccountHolder()));
-        if (request.phone() != null) {
-            seller.setPhone(phoneOrNull(request.phone()));
-        }
         return seller;
     }
 
@@ -105,6 +112,15 @@ public class SellerService {
             throw new ApiException(ErrorCode.WRONG_PASSWORD);
         }
         sellerRepository.delete(seller);
+    }
+
+    /** 아이디 규칙(LoginIds)에 맞게 소문자로. 안 맞으면 LOGIN_ID_INVALID (2026-11-20) */
+    public static String requireLoginId(String raw) {
+        String loginId = LoginIds.normalize(raw);
+        if (loginId == null) {
+            throw new ApiException(ErrorCode.LOGIN_ID_INVALID);
+        }
+        return loginId;
     }
 
     /** 휴대폰 번호를 숫자만으로. 번호 모양이 아니면 PHONE_INVALID */

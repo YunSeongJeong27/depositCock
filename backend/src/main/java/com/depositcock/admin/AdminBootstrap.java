@@ -25,9 +25,10 @@ public class AdminBootstrap implements ApplicationRunner {
             log.info("관리자 계정 설정(APP_ADMIN_EMAIL/APP_ADMIN_PASSWORD)이 없어 관리자 계정을 만들지 않습니다.");
             return;
         }
-        if (!adminService.ensureAdmin(properties.adminEmail(), properties.adminPassword())) {
-            log.warn("관리자 이메일({})로 일반 판매자 계정이 이미 있어 관리자 계정을 만들지 않았습니다. "
-                    + "APP_ADMIN_EMAIL 을 다른 이메일로 바꾸거나 그 계정을 정리하세요.", properties.adminEmail());
+        if (!adminService.ensureAdmin(properties.adminLoginId(), properties.adminEmail(), properties.adminPassword())) {
+            log.warn("관리자 이메일({}) 또는 아이디({})를 일반 판매자 계정이 이미 쓰고 있거나 아이디 형식이 맞지 않아 "
+                            + "관리자 계정을 만들지 않았습니다. APP_ADMIN_EMAIL·APP_ADMIN_LOGIN_ID 를 바꾸거나 그 계정을 정리하세요.",
+                    properties.adminEmail(), properties.adminLoginId());
         }
     }
 }

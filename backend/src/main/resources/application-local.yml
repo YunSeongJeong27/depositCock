@@ -17,3 +17,5 @@ app:
   data-key: ${APP_DATA_KEY:local-dev-data-key-change-me-0123456789abcdef}
   admin-email: ${APP_ADMIN_EMAIL:admin@depositcock.local}
   admin-password: ${APP_ADMIN_PASSWORD:admin1234}
+  # 메일(SMTP) 설정이 없으면 인증번호·아이디·임시 비밀번호 메일을 보내지 않고 백엔드 로그에 내용을 남긴다 (로컬 시험용)
+  mail-dev-log: true

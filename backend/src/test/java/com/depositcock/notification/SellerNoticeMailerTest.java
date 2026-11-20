@@ -26,7 +26,8 @@ class SellerNoticeMailerTest {
         when(sender.createMimeMessage()).thenReturn(new MimeMessage(Session.getInstance(new Properties())));
         ObjectProvider<JavaMailSender> provider = mock(ObjectProvider.class);
         when(provider.getIfAvailable()).thenReturn(sender);
-        SellerNoticeMailer mailer = new SellerNoticeMailer(new SellerMail(provider, "", "alert@gmail.com", "https://example.com"));
+        SellerNoticeMailer mailer = new SellerNoticeMailer(
+                new SellerMail(provider, "", "alert@gmail.com", "https://example.com", false));
 
         mailer.onNotice(new SellerNoticeEvent(NotificationType.MAIL_REFUND_REQUEST, "seller@test.local", 9L, "홍게 <공구>",
                 "3번 주문에 환불 신청이 들어왔습니다.", List.of("홍게 2개 · 20,000원", "주문 확정된 주문입니다.")));

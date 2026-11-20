@@ -15,6 +15,8 @@ class SpaForwardTest extends IntegrationTest {
         mvc.perform(get("/g/abc")).andExpect(forwardedUrl("/index.html"));
         mvc.perform(get("/seller/group-buys/1")).andExpect(forwardedUrl("/index.html"));
         mvc.perform(get("/login")).andExpect(forwardedUrl("/index.html"));
+        // 아이디·비밀번호 찾기 (2026-11-20): 처음엔 빠뜨려서 주소로 바로 열면 404 였음 (브라우저 확인에서 발견)
+        mvc.perform(get("/find-account")).andExpect(forwardedUrl("/index.html"));
     }
 
     @Test

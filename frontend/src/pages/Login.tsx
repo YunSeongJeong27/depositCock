@@ -10,7 +10,7 @@ export default function Login() {
   const { setMe } = useAuth()
   const signupOpen = useSignupOpen()
   const navigate = useNavigate()
-  const [email, setEmail] = useState('')
+  const [loginId, setLoginId] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState<string | null>(null)
   const [busy, setBusy] = useState(false)
@@ -21,7 +21,7 @@ export default function Login() {
     setBusy(true)
     setError(null)
     try {
-      const me = await api.post<Me>('/api/auth/login', { email, password })
+      const me = await api.post<Me>('/api/auth/login', { loginId, password })
       setMe(me)
       navigate(me.role === 'ADMIN' ? '/admin' : '/seller')
     } catch (err) {
@@ -36,8 +36,8 @@ export default function Login() {
       <h1 className="mt"><Link to="/" style={{ color: 'inherit' }}><Brand /></Link> 로그인</h1>
       {params.get('expired') && <div className="warn-box">{T.loginExpired}</div>}
       <form className="card" onSubmit={submit}>
-        <label className="field"><span>이메일</span>
-          <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required autoComplete="email" />
+        <label className="field"><span>아이디</span>
+          <input type="text" value={loginId} onChange={(e) => setLoginId(e.target.value)} required autoComplete="username" autoCapitalize="none" />
         </label>
         <label className="field"><span>비밀번호</span>
           <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} required autoComplete="current-password" />
@@ -45,6 +45,9 @@ export default function Login() {
         <ErrorBox message={error} />
         <button className="btn primary block" disabled={busy}>로그인</button>
       </form>
+      <p className="muted small">
+        <Link to="/find-account?tab=id">아이디 찾기</Link> · <Link to="/find-account?tab=reset">비밀번호 찾기</Link> · <Link to="/find-account?tab=change">비밀번호 변경</Link>
+      </p>
       {signupOpen === false
         ? <p className="muted">{T.signupClosed}</p>
         : <p className="muted">계정이 없나요? <Link to="/signup">회원가입</Link></p>}

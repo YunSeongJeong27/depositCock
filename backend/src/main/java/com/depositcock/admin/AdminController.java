@@ -22,7 +22,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
- * 슈퍼 관리자(윤성) 전용: 판매자 목록, 플랜·유료 만료일·사용 제한·댓글 기능 허용 변경, 탈퇴 처리, 서비스 전체 설정.
+ * 슈퍼 관리자(윤성) 전용: 판매자 목록, 플랜·유료 만료일·사용 제한·댓글 기능 허용 변경, 판매자 계정 만들기,
+ * 정보 수정(아이디·이메일·이름·휴대폰·새 비밀번호), 탈퇴 처리, 서비스 전체 설정.
  */
 @RestController
 @RequiredArgsConstructor
@@ -69,7 +70,7 @@ public class AdminController {
         adminService.updateSeller(sellerId, request);
     }
 
-    /** 판매자 정보 고치기: 이메일·판매자 이름·휴대폰·새 비밀번호 (2026-11-09) */
+    /** 판매자 정보 고치기: 아이디(2026-11-20)·이메일·판매자 이름·휴대폰·새 비밀번호 (2026-11-09). 관리자 자신도 */
     @PutMapping("/api/admin/sellers/{sellerId}/info")
     public void updateInfo(@PathVariable Long sellerId, @Valid @RequestBody SellerInfoRequest request) {
         adminService.updateSellerInfo(sellerId, request);

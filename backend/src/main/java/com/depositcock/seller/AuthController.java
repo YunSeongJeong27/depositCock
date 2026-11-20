@@ -7,7 +7,6 @@ import com.depositcock.security.CurrentSeller;
 import com.depositcock.security.TokenService;
 import com.depositcock.seller.SellerDtos.LoginRequest;
 import com.depositcock.seller.SellerDtos.MeResponse;
-import com.depositcock.seller.SellerDtos.SignupRequest;
 import com.depositcock.seller.SellerDtos.SignupStatus;
 import com.depositcock.seller.SellerDtos.UpdateNotificationsRequest;
 import com.depositcock.seller.SellerDtos.UpdateProfileRequest;
@@ -35,16 +34,10 @@ public class AuthController {
         return new SignupStatus(featureAccess.signupOpen());
     }
 
-    @PostMapping("/api/auth/signup")
-    public MeResponse signup(@Valid @RequestBody SignupRequest request, HttpServletResponse response) {
-        Seller seller = sellerService.signup(request);
-        tokenService.writeCookie(response, tokenService.issue(seller));
-        return toMe(seller);
-    }
-
+    /** 가입은 이메일 인증번호를 거쳐야 해서 account.AccountController 에 있다 (2026-11-20) */
     @PostMapping("/api/auth/login")
     public MeResponse login(@Valid @RequestBody LoginRequest request, HttpServletResponse response) {
-        Seller seller = sellerService.login(request.email(), request.password());
+        Seller seller = sellerService.login(request.loginId(), request.password());
         tokenService.writeCookie(response, tokenService.issue(seller));
         return toMe(seller);
     }

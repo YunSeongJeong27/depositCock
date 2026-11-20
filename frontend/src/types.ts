@@ -3,10 +3,12 @@ export type Plan = 'TRIAL' | 'PAID'
 
 export interface Me {
   id: number
+  /** 로그인 아이디 (2026-11-20) */
+  loginId: string
   email: string
-  displayName: string
-  /** 휴대폰 번호 010-1234-5678 모양. 이 칸이 생기기 전 가입자는 null (2026-11-09) */
+  /** 휴대폰 번호 010-1234-5678 모양 (2026-11-09). 아이디·비밀번호 찾기에도 씀. 이 칸이 생기기 전 가입자·관리자는 null */
   phone: string | null
+  displayName: string
   role: Role
   plan: Plan
   trialEndsAt: string

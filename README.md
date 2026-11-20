@@ -14,18 +14,21 @@
 
 | 구분 | 기능 |
 |---|---|
-| 주문서 링크 | 로그인 없는 고객 주문, 픽업/배송·결제 방식 선택, 재고 선착순(원자 처리), 쿠키로 재방문 인식, 입금자명+휴대폰 뒷자리로 본인 확인, "입금했어요" 신고, 주문 취소 |
+| 주문서 링크 | 로그인 없는 고객 주문, 픽업/배송·결제 방식 선택, 쿠키로 재방문 인식, 휴대폰 번호로 내 주문 찾기, 주문 확정 전 주문 수정, 바로 취소·환불 신청, 주문 잠시 멈춤 |
+| 재고 | 준비 수량을 넘어도 막지 않고 판매자에게 초과 표시·알림 (상품마다 "다 팔리면 품절"을 켜면 주문 막음) |
+| 주문 관리 | 링크·댓글 주문 목록(그리드), 판매자 주문 변경(변경 기록), 환불 신청 처리, 완료 주문 삭제, 알림 설정(메일·화면) |
 | 입금 대조 | 은행 거래내역 엑셀(xlsx/xls)·CSV·PDF 업로드, 은행별 헤더(컬럼)명으로 읽기(운영자 기본값 + 판매자 수정·은행 추가, 안 맞으면 멈춤), 거래내역서 계좌번호 확인, 같은 입금 계좌를 쓰는 공구끼리 거래내역 공유, 자동 매칭/추천/후보 선택·확인 필요(중복·1시간 규칙), 확정 시 입금자 별칭 저장(다음 공구 자동 매칭) |
 | 스크린샷 | 은행앱 거래내역 캡처 → 비전 AI 추출 → 검수 → 대조 (AI 키 설정 시, 판매자별 하루 장수 제한) |
-| 댓글 집계 | 밴드 댓글 캡처·텍스트 → 해석·집계 → 주문으로 반영 |
+| 댓글 집계 | 밴드 댓글 캡처·텍스트 → 해석·집계 → 주문으로 반영 (관리자가 판매자별로 켬, 상품 1개인 공구만) |
 | 정리 | 수령 체크(미입금 경고), 대시보드, 주문 정리표 엑셀, 입금 확인 문구 복사, 입금 확인된 닉네임 목록 |
-| 관리자 | 판매자 목록, 무료 체험/유료 전환·만료일, 사용 제한, 캡처 사용량 조회·하루 제한 변경 |
+| 계정 | 아이디로 로그인, 가입 이메일 인증번호, 아이디 찾기(메일), 비밀번호 찾기(인증번호 → 임시 비밀번호 메일)·변경, 내 정보에서 휴대폰 변경(이메일 인증번호) |
+| 관리자 | 판매자 목록, 무료 체험/유료 전환·만료일, 사용 제한, 캡처 사용량 조회·하루 제한 변경, 판매자 계정 만들기, [정보 수정](아이디·이메일·이름·휴대폰·새 비밀번호), 회원가입·은행앱 캡처 올리기·댓글 주문 기능 켜기·끄기 |
 
 ## 기술 스택
 
 | 영역 | 기술 |
 |---|---|
-| Backend | Java 21, Spring Boot 3.5.6, Spring Data JPA, Lombok, Flyway, Spring Security(JWT, httpOnly 쿠키), Apache POI, Maven Wrapper |
+| Backend | Java 21, Spring Boot 3.5.6, Spring Data JPA, Lombok, Flyway, Spring Security(JWT, httpOnly 쿠키), Apache POI, Apache PDFBox, Maven Wrapper |
 | Frontend | React 18, Vite, TypeScript, React Router |
 | DB | H2 (개발, PostgreSQL 호환 모드), PostgreSQL (운영) |
 | 비전 AI | Spring AI 1.1.8 (Anthropic, 네이티브 구조화 출력), `VisionExtractor` 인터페이스, 기본 꺼짐 |
@@ -71,12 +74,14 @@ java -jar target/depositcock-0.0.1-SNAPSHOT.jar
 
 | 용도 | 값 |
 |---|---|
-| 데모 판매자 | `demo@depositcock.local` / `demo1234` |
-| 관리자 | `admin@depositcock.local` / `admin1234` |
+| 데모 판매자 | 아이디 `demo` / 비밀번호 `demo1234` (휴대폰 010-0000-0001, 이메일 demo@depositcock.local) |
+| 관리자 | 아이디 `admin` / 비밀번호 `admin1234` |
 | 고객 주문서 링크 | http://localhost:8080/g/demo-paprika (개발 모드는 5173) |
 | H2 콘솔 | http://localhost:8080/h2-console (JDBC URL: `jdbc:h2:file:./data/depositcock`, 사용자 `sa`) |
 
-DB 를 처음 상태로 되돌리려면 앱을 끄고 `backend/data/` 폴더를 지우면 됩니다.
+DB 를 처음 상태로 되돌리려면 앱을 끄고 `backend/data/` 폴더를 지우면 됩니다. 이미 있던 로컬 DB 는 지우지 않아도 새 DB 파일(V4)이 아이디를 이메일 @ 앞부분으로 채웁니다.
+
+로컬에서는 메일(SMTP)을 설정하지 않아도 가입 인증번호·아이디 찾기·임시 비밀번호 메일 내용이 백엔드 로그(`[로컬] 메일 미설정 → 보내지 않고 내용만 기록`)에 찍혀서 그 값으로 시험할 수 있습니다.
 
 ### 테스트
 
@@ -101,6 +106,7 @@ docker run -p 8080:8080 \
   -e APP_JWT_SECRET=32바이트이상의임의문자열 \
   -e APP_DATA_KEY=32바이트이상의다른임의문자열 \
   -e APP_ADMIN_EMAIL=... -e APP_ADMIN_PASSWORD=... \
+  -e SPRING_MAIL_HOST=smtp.gmail.com -e SPRING_MAIL_USERNAME=... -e SPRING_MAIL_PASSWORD=... \
   depositcock
 ```
 
@@ -109,12 +115,13 @@ docker run -p 8080:8080 \
 | `DB_URL`, `DB_USERNAME`, `DB_PASSWORD` | PostgreSQL 접속 정보 |
 | `APP_JWT_SECRET` | 로그인 토큰 서명 키 (32바이트 이상, 필수) |
 | `APP_DATA_KEY` | 환불 계좌번호 암호화 키 (32바이트 이상, 필수). 한 번 정하면 바꾸지 않는다 (바꾸면 저장된 계좌번호를 못 읽음) |
-| `APP_ADMIN_EMAIL`, `APP_ADMIN_PASSWORD` | 최초 관리자 계정 (이미 있으면 그대로 둠) |
+| `APP_ADMIN_EMAIL`, `APP_ADMIN_PASSWORD` | 최초 관리자 계정. 관리자가 하나도 없을 때만 만듦 (그 뒤 아이디·이메일·비밀번호 등은 관리자 화면 → [정보 수정]에서 바꿈) |
+| `APP_ADMIN_LOGIN_ID` | 최초 관리자 아이디 (기본 `admin`) |
 | `APP_VISION_PROVIDER` | `anthropic` 이면 스크린샷 글자 읽기 켬 (기본 `fake` = 꺼짐) |
 | `ANTHROPIC_API_KEY` | 위가 `anthropic` 일 때 필요 |
 | `APP_VISION_MODEL` | 비전 모델 (기본 `claude-haiku-5-5`) |
 | `APP_VISION_DAILY_CAPTURE_LIMIT` | 판매자별 하루 캡처 장수 기본 제한 (기본 30, 관리자 화면에서 판매자별 변경) |
-| `SPRING_MAIL_HOST`, `SPRING_MAIL_USERNAME`, `SPRING_MAIL_PASSWORD` | 판매자 알림 메일 (SMTP: 재고·환불 신청 등, 판매자가 "내 정보 → 알림 설정"에서 켠 것). 없으면 메일을 보내지 않음 (화면 알림만, 아직 설정 전). Gmail 예: `smtp.gmail.com`, 보내는 Gmail 주소, 구글 계정의 "앱 비밀번호" |
+| `SPRING_MAIL_HOST`, `SPRING_MAIL_USERNAME`, `SPRING_MAIL_PASSWORD` | 메일 (SMTP). **운영에서는 필수**: 가입 인증번호·아이디 찾기·임시 비밀번호 메일이 이것으로 나가며, 없으면 가입·찾기가 "지금은 메일을 보낼 수 없습니다"로 막힘. 판매자 알림 메일(재고·환불 신청 등)도 이것으로 보냄. Gmail 예: `smtp.gmail.com`, 보내는 Gmail 주소, 구글 계정의 "앱 비밀번호" |
 | `SPRING_MAIL_PORT` | SMTP 포트 (기본 587, STARTTLS) |
 | `APP_MAIL_FROM` | 보내는 사람 주소 (비우면 `SPRING_MAIL_USERNAME`) |
 | `APP_PUBLIC_BASE_URL` | 메일 속 "공구 화면 열기" 링크용 서비스 주소 (예: `https://example.com`, 비우면 링크 없음) |
