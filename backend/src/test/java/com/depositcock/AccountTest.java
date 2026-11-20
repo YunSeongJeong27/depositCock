@@ -203,17 +203,40 @@ class AccountTest extends IntegrationTest {
         login(loginId, "newpass456");
     }
 
+    /** 내 정보의 휴대폰 변경은 가입 이메일로 받은 인증번호를 넣어야 된다. 내 정보 저장으로는 안 바뀜 */
     @Test
-    void profilePhoneCanChange() throws Exception {
+    void phoneChangeNeedsEmailCode() throws Exception {
         String email = uniqueEmail();
         Cookie seller = signup(email);
+        // 내 정보 저장에 휴대폰을 같이 보내도 바뀌지 않음
         mvc.perform(withJson(put("/api/seller/profile").cookie(seller), Map.of("displayName", "공구장",
-                        "phone", "1234")))
+                        "phone", "010-7777-8888")))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.phone").value(PHONE));
+        // 인증번호를 받기 전
+        mvc.perform(withJson(put("/api/seller/phone").cookie(seller), Map.of("phone", "010-5555-6666", "code", "123456")))
+                .andExpect(jsonPath("$.code").value("EMAIL_CODE_NOT_SENT"));
+        // 로그인 없이는 못 받음
+        mvc.perform(post("/api/seller/phone/email-code")).andExpect(status().isUnauthorized());
+        mvc.perform(post("/api/seller/phone/email-code").cookie(seller))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.validMinutes").value(10));
+        assertThat(mailbox.lastBodyTo(email)).contains("휴대폰 번호 변경 인증번호");
+        String code = mailbox.lastCodeTo(email);
+        // 번호 형식이 틀리면 인증번호를 보기 전에 막음 (틀린 횟수를 쓰지 않음)
+        mvc.perform(withJson(put("/api/seller/phone").cookie(seller), Map.of("phone", "1234", "code", code)))
                 .andExpect(jsonPath("$.code").value("PHONE_INVALID"));
-        mvc.perform(withJson(put("/api/seller/profile").cookie(seller), Map.of("displayName", "공구장",
-                        "phone", "010 5555 6666")))
+        String wrong = code.equals("000000") ? "111111" : "000000";
+        mvc.perform(withJson(put("/api/seller/phone").cookie(seller), Map.of("phone", "010-5555-6666", "code", wrong)))
+                .andExpect(jsonPath("$.code").value("EMAIL_CODE_WRONG"));
+        assertThat(jdbc.queryForObject("select failed_attempts from email_verification where email = ? and purpose = 'PHONE'",
+                Integer.class, email)).isEqualTo(1);
+        mvc.perform(withJson(put("/api/seller/phone").cookie(seller), Map.of("phone", "010 5555 6666", "code", code)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.phone").value("010-5555-6666"));
+        // 인증번호는 한 번만
+        mvc.perform(withJson(put("/api/seller/phone").cookie(seller), Map.of("phone", "010-1111-2222", "code", code)))
+                .andExpect(jsonPath("$.code").value("EMAIL_CODE_NOT_SENT"));
         // 바뀐 번호로 아이디 찾기
         mvc.perform(withJson(post("/api/auth/find-login-id"), Map.of("email", email, "phone", "010-5555-6666")))
                 .andExpect(status().isOk());
@@ -255,5 +278,29 @@ class AccountTest extends IntegrationTest {
         login(newId, "byadmin789");
         mvc.perform(withJson(post("/api/auth/login"), Map.of("loginId", loginIdOf(email), "password", "password123")))
                 .andExpect(status().isUnauthorized());
+
+        // 이름·이메일·휴대폰: 이메일 중복·휴대폰 형식 검사, 그 밖에는 인증 없이 바로
+        String info = "/api/admin/sellers/" + sellerId + "/info";
+        mvc.perform(withJson(put(info).cookie(admin), Map.of("displayName", "새이름", "email", "admin@test.local",
+                "phone", PHONE))).andExpect(jsonPath("$.code").value("EMAIL_TAKEN"));
+        mvc.perform(withJson(put(info).cookie(admin), Map.of("displayName", "새이름", "email", email, "phone", "02-123-4567")))
+                .andExpect(jsonPath("$.code").value("PHONE_INVALID"));
+        String newEmail = uniqueEmail();
+        mvc.perform(withJson(put(info).cookie(admin), Map.of("displayName", "새이름", "email", newEmail.toUpperCase(),
+                "phone", "010-4444-5555"))).andExpect(status().isOk());
+        mvc.perform(get("/api/me").cookie(login(newId, "byadmin789")))
+                .andExpect(jsonPath("$.displayName").value("새이름"))
+                .andExpect(jsonPath("$.email").value(newEmail))
+                .andExpect(jsonPath("$.phone").value("010-4444-5555"));
+        mvc.perform(withJson(post("/api/auth/find-login-id"), Map.of("email", newEmail, "phone", "010-4444-5555")))
+                .andExpect(status().isOk());
+        assertThat(mailbox.lastBodyTo(newEmail)).contains("아이디: " + newId);
+        // 휴대폰을 비우면 지움
+        java.util.Map<String, Object> clear = new java.util.HashMap<>();
+        clear.put("displayName", "새이름");
+        clear.put("email", newEmail);
+        clear.put("phone", "");
+        mvc.perform(withJson(put(info).cookie(admin), clear)).andExpect(status().isOk());
+        mvc.perform(get("/api/me").cookie(login(newId, "byadmin789"))).andExpect(jsonPath("$.phone").isEmpty());
     }
 }

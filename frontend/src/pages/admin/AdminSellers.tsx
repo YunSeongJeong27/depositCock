@@ -36,15 +36,22 @@ const emailWithBreak = (email: string) => {
 }
 
 /**
- * 판매자 상세 창 (2026-11-20): 아이디·이메일·휴대폰을 보고 아이디·비밀번호를 바꾼다.
+ * 판매자 상세 창 (2026-11-20): 판매자 이름·이메일·휴대폰·아이디·비밀번호를 바꾼다 (이메일 인증 없이 바로).
  * 비밀번호는 일방향 해시로만 저장해서 지금 값은 보여 줄 수 없고, 새 비밀번호를 정하는 것만 된다
  */
 function SellerDetail({ row, onClose, onChanged }: { row: Row; onClose: () => void; onChanged: () => void }) {
+  const [info, setInfo] = useState({ displayName: row.displayName, email: row.email, phone: row.phone ?? '' })
   const [loginId, setLoginId] = useState(row.loginId)
   const [password, setPassword] = useState('')
-  const [message, setMessage] = useState<string | null>(null)
-  const [error, setError] = useState<string | null>(null)
+  /** 안내·오류는 누른 버튼이 있는 칸 바로 아래에 보인다 (창이 길어서 맨 아래에 두면 안 보임) */
+  type Part = 'info' | 'loginId' | 'password'
+  const [message, setMessage] = useState<{ part: Part; text: string } | null>(null)
+  const [error, setError] = useState<{ part: Part; text: string } | null>(null)
   const [busy, setBusy] = useState(false)
+  const notice = (part: Part) => <>
+    {message?.part === part && <div className="success-box">{message.text}</div>}
+    <ErrorBox message={error?.part === part ? error.text : null} />
+  </>
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose() }
@@ -52,25 +59,28 @@ function SellerDetail({ row, onClose, onChanged }: { row: Row; onClose: () => vo
     return () => window.removeEventListener('keydown', onKey)
   }, [onClose])
 
-  async function run(confirmText: string, action: () => Promise<unknown>, done: string) {
-    if (!confirm(confirmText)) return
+  async function run(part: Part, confirmText: string | null, action: () => Promise<unknown>, done: string) {
+    if (confirmText && !confirm(confirmText)) return
     setBusy(true)
     setError(null)
     setMessage(null)
     try {
       await action()
-      setMessage(done)
+      setMessage({ part, text: done })
       onChanged()
     } catch (e) {
-      setError(errorMessage(e))
+      setError({ part, text: errorMessage(e) })
     } finally {
       setBusy(false)
     }
   }
 
-  const changeLoginId = () => run(T.confirmAdminLoginId(row.loginId, loginId.trim()),
+  const infoChanged = info.displayName.trim() !== row.displayName || info.email.trim() !== row.email
+    || info.phone.trim() !== (row.phone ?? '')
+  const saveInfo = () => run('info', null, () => api.put(`/api/admin/sellers/${row.id}/info`, info), T.adminInfoSaved)
+  const changeLoginId = () => run('loginId', T.confirmAdminLoginId(row.loginId, loginId.trim()),
     () => api.put(`/api/admin/sellers/${row.id}/login-id`, { loginId }), T.adminLoginIdChanged)
-  const changePassword = () => run(T.confirmAdminPassword(loginId.trim() || row.loginId),
+  const changePassword = () => run('password', T.confirmAdminPassword(loginId.trim() || row.loginId),
     async () => {
       await api.put(`/api/admin/sellers/${row.id}/password`, { password })
       setPassword('')
@@ -89,20 +99,33 @@ function SellerDetail({ row, onClose, onChanged }: { row: Row; onClose: () => vo
             <tr><th>구분</th><td>{row.role === 'ADMIN' ? '관리자' : '판매자'} · 가입 {row.createdAt.substring(0, 10)} · 공구 {row.groupBuyCount}개</td></tr>
           </tbody>
         </table>
+        <h4>판매자 정보 변경</h4>
+        <label className="field"><span>판매자 이름</span>
+          <input type="text" value={info.displayName} onChange={(e) => setInfo({ ...info, displayName: e.target.value })} />
+        </label>
+        <label className="field"><span>이메일</span>
+          <input type="email" value={info.email} onChange={(e) => setInfo({ ...info, email: e.target.value })} autoComplete="off" />
+        </label>
+        <label className="field"><span>휴대폰</span>
+          <input type="tel" value={info.phone} onChange={(e) => setInfo({ ...info, phone: e.target.value })} placeholder="010-0000-0000" autoComplete="off" />
+        </label>
+        <div className="muted small">{T.adminInfoNote}</div>
+        <button type="button" className="btn mt" disabled={busy || !infoChanged || !info.displayName.trim() || !info.email.trim()} onClick={saveInfo}>정보 저장</button>
+        {notice('info')}
         <h4>아이디 변경</h4>
         <div className="row">
           <input type="text" value={loginId} onChange={(e) => setLoginId(e.target.value)} aria-label="새 아이디" autoCapitalize="none" style={{ flex: 1, minWidth: 160 }} />
           <button type="button" className="btn" disabled={busy || !loginId.trim() || loginId.trim() === row.loginId} onClick={changeLoginId}>아이디 변경</button>
         </div>
         <div className="muted small">{T.loginIdHint}</div>
+        {notice('loginId')}
         <h4>비밀번호 변경</h4>
         <div className="row">
           <input type="text" value={password} onChange={(e) => setPassword(e.target.value)} aria-label="새 비밀번호" placeholder="새 비밀번호 (8자 이상)"
             autoComplete="off" style={{ flex: 1, minWidth: 160 }} />
           <button type="button" className="btn" disabled={busy || password.length < 8} onClick={changePassword}>비밀번호 변경</button>
         </div>
-        {message && <div className="success-box">{message}</div>}
-        <ErrorBox message={error} />
+        {notice('password')}
         <div className="row between modal-foot">
           <span />
           <button type="button" className="btn primary" onClick={onClose}>닫기</button>

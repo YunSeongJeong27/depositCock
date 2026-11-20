@@ -40,6 +40,8 @@ public class Seller extends BaseTimeEntity {
     @Column(nullable = false, unique = true)
     private String loginId;
 
+    /** 가입 이메일. 판매자는 못 바꾸고 관리자만 바꾼다 (2026-11-20) */
+    @Setter
     @Column(nullable = false, unique = true)
     private String email;
 

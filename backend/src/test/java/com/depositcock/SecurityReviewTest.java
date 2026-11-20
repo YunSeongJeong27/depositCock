@@ -38,6 +38,9 @@ class SecurityReviewTest extends IntegrationTest {
     @Autowired
     AdminService adminService;
 
+    @Autowired
+    org.springframework.jdbc.core.JdbcTemplate jdbc;
+
     @Test
     void writeRequestsWithoutHeaderAreRejected() throws Exception {
         // 직접 만든 MockMvc 는 서블릿 필터가 자동으로 붙지 않아서 CsrfHeaderFilter 를 명시적으로 붙인다
@@ -146,16 +149,20 @@ class SecurityReviewTest extends IntegrationTest {
                 .andExpect(status().isOk());
     }
 
-    /** 관리자 이메일·아이디를 일반 판매자가 먼저 쓰고 있으면 관리자로 바꾸지 않는다 */
+    /**
+     * 관리자 이메일·아이디를 일반 판매자가 먼저 쓰고 있어도 관리자로 바꾸지 않는다.
+     * 관리자가 이미 있으면 다른 이메일·아이디로 불러도 관리자를 더 만들지 않는다 (2026-11-20).
+     * 관리자가 없을 때 판매자와 겹치는 경우는 AdminBootstrapRuleTest
+     */
     @Test
     void adminBootstrapDoesNotPromoteExistingSeller() throws Exception {
         String email = uniqueEmail();
         signup(email);
-        assertThat(adminService.ensureAdmin("newadmin", email, "whatever123")).isFalse();
-        // 아이디를 일반 판매자가 이미 쓰고 있어도 만들지 않는다
-        assertThat(adminService.ensureAdmin(loginIdOf(email), uniqueEmail(), "whatever123")).isFalse();
+        Integer admins = jdbc.queryForObject("select count(*) from seller where role = 'ADMIN'", Integer.class);
+        assertThat(adminService.ensureAdmin("newadmin", email, "whatever123")).isTrue();
+        assertThat(adminService.ensureAdmin("brandnew", uniqueEmail(), "whatever123")).isTrue();
+        assertThat(jdbc.queryForObject("select count(*) from seller where role = 'ADMIN'", Integer.class)).isEqualTo(admins);
         Cookie cookie = login(email, "password123");
         mvc.perform(get("/api/admin/sellers").cookie(cookie)).andExpect(status().isForbidden());
-        assertThat(adminService.ensureAdmin("admin", "admin@test.local", "admin1234")).isTrue();
     }
 }

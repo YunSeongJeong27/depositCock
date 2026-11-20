@@ -6,7 +6,7 @@ import jakarta.validation.constraints.Size;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 
-/** 가입 이메일 인증, 아이디 찾기, 비밀번호 찾기·변경 (2026-11-20) */
+/** 가입 이메일 인증, 아이디 찾기, 비밀번호 찾기·변경, 휴대폰 변경 (2026-11-20) */
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class AccountDtos {
 
@@ -49,6 +49,12 @@ public final class AccountDtos {
             @NotBlank(message = "EMAIL_REQUIRED") @Size(max = 255, message = "EMAIL_TOO_LONG") String email,
             @NotBlank(message = "PHONE_REQUIRED") @Size(max = 30, message = "PHONE_TOO_LONG") String phone,
             @NotBlank(message = "PASSWORD_REQUIRED") @Size(min = 8, max = 100, message = "PASSWORD_LENGTH") String newPassword) {
+    }
+
+    /** 로그인한 판매자의 휴대폰 번호 변경: 새 번호 + 가입 이메일로 받은 인증번호 */
+    public record PhoneChangeRequest(
+            @NotBlank(message = "PHONE_REQUIRED") @Size(max = 30, message = "PHONE_TOO_LONG") String phone,
+            @NotBlank(message = "EMAIL_CODE_REQUIRED") @Size(max = 20, message = "EMAIL_CODE_TOO_LONG") String code) {
     }
 
     /** 인증번호를 보냈다는 응답: 몇 분 안에 넣어야 하는지 */

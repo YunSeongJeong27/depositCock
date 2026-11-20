@@ -5,6 +5,7 @@ import java.time.LocalDateTime;
 
 import com.depositcock.seller.Plan;
 import com.depositcock.seller.Role;
+import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
@@ -58,6 +59,14 @@ public final class AdminDtos {
     /** 관리자가 아이디 바꾸기 (2026-11-20) */
     public record AdminLoginIdRequest(
             @NotBlank(message = "LOGIN_ID_REQUIRED") @Size(max = 30, message = "LOGIN_ID_TOO_LONG") String loginId) {
+    }
+
+    /** 관리자가 판매자 정보(이름·이메일·휴대폰) 바꾸기 (2026-11-20). 휴대폰은 비우면 지움 */
+    public record AdminInfoRequest(
+            @NotBlank(message = "SELLER_NAME_REQUIRED") @Size(max = 100, message = "SELLER_NAME_TOO_LONG") String displayName,
+            @NotBlank(message = "EMAIL_REQUIRED") @Email(message = "EMAIL_INVALID")
+            @Size(max = 255, message = "EMAIL_TOO_LONG") String email,
+            @Size(max = 30, message = "PHONE_TOO_LONG") String phone) {
     }
 
     /** 관리자가 비밀번호 새로 정하기 (2026-11-20) */

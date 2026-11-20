@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import com.depositcock.admin.AdminDtos.AdminInfoRequest;
 import com.depositcock.admin.AdminDtos.AdminSellerRow;
 import com.depositcock.admin.AdminDtos.AdminUpdateRequest;
 import com.depositcock.common.ApiException;
@@ -110,16 +111,19 @@ public class AdminService {
     }
 
     /**
-     * 관리자 계정이 없으면 만든다 (이미 있으면 비밀번호도 그대로 둔다. 바꾸려면 관리자 화면의 비밀번호 변경).
+     * 관리자 계정이 하나도 없으면 만든다. 이미 있으면 아무것도 바꾸지 않는다 (비밀번호·이메일·아이디는 관리자 화면에서 바꿈).
+     * 관리자가 화면에서 자기 이메일·아이디를 바꾼 뒤 앱을 다시 켜도 환경변수 값으로 관리자가 하나 더 생기지 않게 (2026-11-20).
      * 같은 이메일·아이디를 일반 판매자가 먼저 쓰고 있으면 관리자로 바꾸지 않고 false 를 돌려준다.
      * 아이디가 형식에 맞지 않아도 false.
      */
     @Transactional
     public boolean ensureAdmin(String rawLoginId, String email, String rawPassword) {
+        if (sellerRepository.existsByRole(Role.ADMIN)) {
+            return true;
+        }
         String normalized = SellerService.normalizeEmail(email);
-        Seller existing = sellerRepository.findByEmail(normalized).orElse(null);
-        if (existing != null) {
-            return existing.getRole() == Role.ADMIN;
+        if (sellerRepository.existsByEmail(normalized)) {
+            return false;
         }
         String loginId = LoginIds.normalize(rawLoginId);
         if (loginId == null || sellerRepository.existsByLoginId(loginId)) {
@@ -129,6 +133,29 @@ public class AdminService {
         sellerRepository.save(new Seller(loginId, normalized, null, passwordEncoder.encode(rawPassword), "관리자",
                 Role.ADMIN, now, now.plusYears(100)));
         return true;
+    }
+
+    /**
+     * 관리자가 판매자(관리자 자신 포함) 이름·이메일·휴대폰을 바꾼다 (2026-11-20). 이메일 인증 없이 바로.
+     * 이메일은 다른 계정과 겹치면 안 되고, 휴대폰은 비우면 지운다 (지우면 그 판매자는 아이디·비밀번호 찾기를 못 함)
+     */
+    @Transactional
+    public void changeInfo(Long sellerId, AdminInfoRequest request) {
+        Seller seller = find(sellerId);
+        String email = SellerService.normalizeEmail(request.email());
+        if (!email.equals(seller.getEmail()) && sellerRepository.existsByEmail(email)) {
+            throw new ApiException(ErrorCode.EMAIL_TAKEN);
+        }
+        String phone = null;
+        if (request.phone() != null && !request.phone().isBlank()) {
+            phone = PhoneNumbers.normalize(request.phone());
+            if (phone == null) {
+                throw new ApiException(ErrorCode.PHONE_INVALID);
+            }
+        }
+        seller.setDisplayName(request.displayName().trim());
+        seller.setEmail(email);
+        seller.setPhone(phone);
     }
 
     /** 관리자가 판매자(관리자 자신 포함) 아이디를 바꾼다 (2026-11-20). 규칙·중복 검사는 가입과 같음 */

@@ -20,6 +20,8 @@ export const accountText = {
   changeHelp: '아이디·가입 이메일·휴대폰 번호가 맞으면 이메일로 인증번호를 보내 드립니다. 인증번호를 확인한 뒤 새 비밀번호를 정하세요.',
   changeDone: '비밀번호를 바꿨습니다. 새 비밀번호로 로그인해 주세요.',
   passwordMismatch: '새 비밀번호와 비밀번호 확인이 다릅니다.',
+  phoneChangeHelp: (email: string) => `인증번호는 가입 이메일 ${email} 주소로 보내 드립니다. 새 번호를 적고 받은 인증번호를 넣으면 바뀝니다.`,
+  phoneChanged: '휴대폰 번호를 바꿨습니다.',
 
   // 내 정보
   withdrawPrompt: '탈퇴하면 모든 공구·주문·입금 정보가 삭제되고 되돌릴 수 없습니다. 필요한 주문 정리표는 먼저 내려받으세요.\n계속하려면 비밀번호를 입력하세요.',
@@ -42,6 +44,8 @@ export const accountText = {
   adminPasswordNote: '비밀번호는 되돌릴 수 없게 암호화해 저장해서 지금 비밀번호는 누구도 볼 수 없습니다. 새 비밀번호를 정하면 이메일 인증 없이 바로 바뀝니다.',
   confirmAdminLoginId: (from: string, to: string) => `아이디를 ${from}에서 ${to}${josa(to, '으로/로')} 바꿉니다. 판매자에게 새 아이디를 알려 주세요. 계속할까요?`,
   confirmAdminPassword: (loginId: string) => `${loginId} 계정의 비밀번호를 바꿉니다. 판매자에게 새 비밀번호를 알려 주세요. 계속할까요?`,
+  adminInfoNote: '이메일·휴대폰은 인증 없이 바로 바뀝니다. 이메일을 바꾸면 알림·계정 메일이 새 이메일로 갑니다. 휴대폰을 비우면 그 판매자는 아이디·비밀번호 찾기를 못 합니다.',
+  adminInfoSaved: '정보를 저장했습니다.',
   adminLoginIdChanged: '아이디를 바꿨습니다.',
   adminPasswordChanged: '비밀번호를 바꿨습니다.',
 }

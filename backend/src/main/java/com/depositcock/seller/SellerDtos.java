@@ -30,10 +30,9 @@ public final class SellerDtos {
                                @NotBlank(message = "PASSWORD_REQUIRED") String password) {
     }
 
+    /** 내 정보 저장. 휴대폰은 이메일 인증을 거쳐 따로 바꾼다 (account, PUT /api/seller/phone) */
     public record UpdateProfileRequest(
             @NotBlank(message = "SELLER_NAME_REQUIRED") @Size(max = 100, message = "SELLER_NAME_TOO_LONG") String displayName,
-            /** 아이디·비밀번호 찾기에 쓰는 휴대폰 번호 (2026-11-20) */
-            @NotBlank(message = "PHONE_REQUIRED") @Size(max = 30, message = "PHONE_TOO_LONG") String phone,
             @Size(max = 50, message = "BANK_NAME_TOO_LONG") String defaultBankName,
             @Size(max = 50, message = "ACCOUNT_NUMBER_TOO_LONG") String defaultAccountNumber,
             @Size(max = 50, message = "ACCOUNT_HOLDER_TOO_LONG") String defaultAccountHolder) {

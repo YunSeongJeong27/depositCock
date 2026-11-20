@@ -6,7 +6,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
 /**
- * 계정 메일 (2026-11-20): 가입 인증번호, 아이디 찾기, 비밀번호 찾기·변경 인증번호, 임시 비밀번호.
+ * 계정 메일 (2026-11-20): 가입 인증번호, 아이디 찾기, 비밀번호 찾기·변경 인증번호, 임시 비밀번호, 휴대폰 변경 인증번호.
  * 알림 메일과 달리 요청 안에서 바로 보내고, 못 보내면 요청을 실패시킨다 (SellerMail.sendRequired).
  * 메일에는 아이디·인증번호·임시 비밀번호만 넣고 이름·휴대폰 번호는 넣지 않는다.
  */
@@ -23,6 +23,11 @@ public class AccountMailer {
 
     public void passwordCode(String email, String code, int validMinutes) {
         send(email, MailText.PASSWORD_CODE, List.of(MailText.CODE_LINE.text(code)),
+                List.of(MailText.CODE_VALID_MINUTES.text(validMinutes)));
+    }
+
+    public void phoneCode(String email, String code, int validMinutes) {
+        send(email, MailText.PHONE_CODE, List.of(MailText.CODE_LINE.text(code)),
                 List.of(MailText.CODE_VALID_MINUTES.text(validMinutes)));
     }
 

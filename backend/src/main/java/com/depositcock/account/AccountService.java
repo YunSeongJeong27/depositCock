@@ -24,6 +24,7 @@ import org.springframework.transaction.annotation.Transactional;
  *   <li>아이디 찾기: 가입 이메일 + 휴대폰 번호가 맞으면 아이디를 그 이메일로 바로 보낸다</li>
  *   <li>비밀번호 찾기: 아이디 + 가입 이메일 + 휴대폰 번호가 맞으면 인증번호를 보내고, 확인되면 임시 비밀번호를 메일로</li>
  *   <li>비밀번호 변경: 같은 확인 + 인증번호 확인 뒤 새 비밀번호로</li>
+ *   <li>휴대폰 번호 변경 (로그인 뒤 내 정보): 가입 이메일로 받은 인증번호를 넣어야 바뀐다</li>
  * </ul>
  * 비밀번호 찾기에 인증번호를 거치는 이유: 거치지 않으면 남이 아이디·이메일·휴대폰만 알아도 그 사람 비밀번호를
  * 임시 비밀번호로 바꿔 버릴 수 있다. 휴대폰 인증은 하지 않는다 (사용자 결정).
@@ -97,6 +98,30 @@ public class AccountService {
         Seller seller = byAccount(loginId, email, phone);
         verifications.consume(VerificationPurpose.PASSWORD, seller.getEmail(), seller.getId());
         seller.setPasswordHash(passwordEncoder.encode(newPassword));
+    }
+
+    /** 로그인한 판매자의 휴대폰 변경 인증번호를 가입 이메일로 보낸다 */
+    public void sendPhoneCode(Long sellerId) {
+        Seller seller = sellerService.get(sellerId);
+        String code = verifications.issue(VerificationPurpose.PHONE, seller.getEmail(), seller.getId());
+        mailer.phoneCode(seller.getEmail(), code, EmailVerificationService.CODE_VALID_MINUTES);
+    }
+
+    /**
+     * 휴대폰 번호 변경: 새 번호 형식을 먼저 보고(틀려도 인증번호 시도 횟수를 쓰지 않게) 인증번호를 확인한 뒤 바꾼다.
+     * 틀린 인증번호 횟수가 남아야 해서 ApiException 으로 되돌리지 않는다 (확인 전에 바뀌는 값이 없음)
+     */
+    @Transactional(noRollbackFor = ApiException.class)
+    public Seller changePhone(Long sellerId, String rawPhone, String code) {
+        Seller seller = sellerService.get(sellerId);
+        String phone = PhoneNumbers.normalize(rawPhone);
+        if (phone == null) {
+            throw new ApiException(ErrorCode.PHONE_INVALID);
+        }
+        verifications.verify(VerificationPurpose.PHONE, seller.getEmail(), seller.getId(), code);
+        verifications.consume(VerificationPurpose.PHONE, seller.getEmail(), seller.getId());
+        seller.setPhone(phone);
+        return seller;
     }
 
     /** 가입 이메일 + 휴대폰 번호가 모두 맞는 판매자. 하나라도 다르면 어느 것이 다른지 알리지 않고 ACCOUNT_NOT_FOUND */

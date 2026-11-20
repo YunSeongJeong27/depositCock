@@ -72,11 +72,6 @@ public class SellerService {
     @Transactional
     public Seller updateProfile(Long sellerId, UpdateProfileRequest request) {
         Seller seller = get(sellerId);
-        String phone = PhoneNumbers.normalize(request.phone());
-        if (phone == null) {
-            throw new ApiException(ErrorCode.PHONE_INVALID);
-        }
-        seller.setPhone(phone);
         seller.setDisplayName(request.displayName().trim());
         seller.setDefaultBankName(Texts.blankToNull(request.defaultBankName()));
         seller.setDefaultAccountNumber(Texts.blankToNull(request.defaultAccountNumber()));
