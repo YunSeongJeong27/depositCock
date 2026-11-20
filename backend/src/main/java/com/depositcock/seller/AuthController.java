@@ -7,6 +7,7 @@ import com.depositcock.security.CurrentSeller;
 import com.depositcock.security.TokenService;
 import com.depositcock.seller.SellerDtos.LoginRequest;
 import com.depositcock.seller.SellerDtos.MeResponse;
+import com.depositcock.seller.SellerDtos.SignupStatus;
 import com.depositcock.seller.SellerDtos.UpdateNotificationsRequest;
 import com.depositcock.seller.SellerDtos.UpdateProfileRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -26,6 +27,12 @@ public class AuthController {
     private final TokenService tokenService;
     private final Clock clock;
     private final FeatureAccess featureAccess;
+
+    /** 새 회원가입을 받는지. 로그인 전 화면이 가입 버튼을 켜고 끄는 데 쓴다 (2026-11-09) */
+    @GetMapping("/api/auth/signup-open")
+    public SignupStatus signupOpen() {
+        return new SignupStatus(featureAccess.signupOpen());
+    }
 
     /** 가입은 이메일 인증번호를 거쳐야 해서 account.AccountController 에 있다 (2026-11-20) */
     @PostMapping("/api/auth/login")
@@ -71,6 +78,6 @@ public class AuthController {
     }
 
     private MeResponse toMe(Seller seller) {
-        return MeResponse.of(seller, LocalDateTime.now(clock), featureAccess.commentsAllowed(seller));
+        return MeResponse.of(seller, LocalDateTime.now(clock), featureAccess.commentsAllowed(seller), featureAccess.depositCaptureOpen());
     }
 }

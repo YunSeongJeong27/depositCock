@@ -184,7 +184,7 @@ export default function CommentsTab({ groupBuy, reload }: { groupBuy: GroupBuy; 
           <button className="btn" disabled={!files || busy} onClick={extract}>캡처 글자 읽기</button>
         </div>
         <label className="field mt"><span>{T.pasteLabel}</span>
-          <textarea value={text} onChange={(e) => setText(e.target.value)} placeholder={'꼭지맘 217-1505 | 1\n205-1205 | 1 7시이후 픽업\n망고맘 | 2박스요'} />
+          <textarea value={text} onChange={(e) => setText(e.target.value)} />
           <span className="muted small" style={{ fontWeight: 400 }}>{T.pasteHint}</span>
         </label>
         <button className="btn" disabled={!text.trim() || busy} onClick={parseText}>텍스트 읽기</button>

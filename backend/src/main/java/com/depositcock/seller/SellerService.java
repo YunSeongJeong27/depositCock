@@ -25,22 +25,29 @@ public class SellerService {
     private final SellerRepository sellerRepository;
     private final PasswordEncoder passwordEncoder;
     private final AppProperties properties;
+    private final FeatureAccess featureAccess;
     private final Clock clock;
 
     /**
-     * 판매자 만들기. 이메일 인증 확인은 부르는 쪽(account.AccountService.signup)이 같은 트랜잭션에서 한다.
-     * 아이디·휴대폰·중복 검사를 여기서 먼저 해서 잘못된 가입이 이메일 인증을 써 버리지 않게 한다.
+     * 회원가입. 관리자가 회원가입을 꺼 두면 막는다 (2026-11-09).
+     * 이메일 인증 확인은 부르는 쪽(account.AccountService.signup)이 같은 트랜잭션에서 한다 (2026-11-20).
      */
     @Transactional
     public Seller signup(SignupRequest request) {
-        String loginId = LoginIds.normalize(request.loginId());
-        if (loginId == null) {
-            throw new ApiException(ErrorCode.LOGIN_ID_INVALID);
+        if (!featureAccess.signupOpen()) {
+            throw new ApiException(ErrorCode.SIGNUP_CLOSED);
         }
-        String phone = PhoneNumbers.normalize(request.phone());
-        if (phone == null) {
-            throw new ApiException(ErrorCode.PHONE_INVALID);
-        }
+        return create(request);
+    }
+
+    /**
+     * 판매자 계정 만들기: 회원가입, 관리자가 직접 만들기(2026-11-09, 회원가입을 꺼 둬도 됨). 가입한 날부터 무료 체험.
+     * 아이디(2026-11-20)·휴대폰·중복 검사를 여기서 먼저 해서, 잘못 적은 가입이 이메일 인증을 써 버리지 않게 한다.
+     */
+    @Transactional
+    public Seller create(SignupRequest request) {
+        String loginId = requireLoginId(request.loginId());
+        String phone = requirePhone(request.phone());
         String email = normalizeEmail(request.email());
         if (sellerRepository.existsByLoginId(loginId)) {
             throw new ApiException(ErrorCode.LOGIN_ID_TAKEN);
@@ -69,6 +76,7 @@ public class SellerService {
                 .orElseThrow(() -> new ApiException(ErrorCode.LOGIN_REQUIRED));
     }
 
+    /** 내 정보 저장 (이름·기본 계좌). 휴대폰은 이메일 인증을 거쳐 따로 (account.AccountService.changePhone, 2026-11-20) */
     @Transactional
     public Seller updateProfile(Long sellerId, UpdateProfileRequest request) {
         Seller seller = get(sellerId);
@@ -104,6 +112,29 @@ public class SellerService {
             throw new ApiException(ErrorCode.WRONG_PASSWORD);
         }
         sellerRepository.delete(seller);
+    }
+
+    /** 아이디 규칙(LoginIds)에 맞게 소문자로. 안 맞으면 LOGIN_ID_INVALID (2026-11-20) */
+    public static String requireLoginId(String raw) {
+        String loginId = LoginIds.normalize(raw);
+        if (loginId == null) {
+            throw new ApiException(ErrorCode.LOGIN_ID_INVALID);
+        }
+        return loginId;
+    }
+
+    /** 휴대폰 번호를 숫자만으로. 번호 모양이 아니면 PHONE_INVALID */
+    public static String requirePhone(String raw) {
+        String phone = PhoneNumbers.normalize(raw);
+        if (phone == null) {
+            throw new ApiException(ErrorCode.PHONE_INVALID);
+        }
+        return phone;
+    }
+
+    /** 빈 값이면 null(지움), 아니면 requirePhone */
+    public static String phoneOrNull(String raw) {
+        return Texts.blankToNull(raw) == null ? null : requirePhone(raw);
     }
 
     /** 이메일 비교용: 앞뒤 공백을 빼고 소문자로 (관리자 계정 만들기도 같이 씀) */

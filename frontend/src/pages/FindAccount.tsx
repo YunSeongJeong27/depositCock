@@ -2,7 +2,7 @@ import { useEffect, useState, type FormEvent } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
 import { api, errorMessage } from '../api'
 import { useAuth } from '../auth'
-import { ErrorBox } from '../components/Ui'
+import { Brand, ErrorBox } from '../components/Ui'
 import { accountText as T } from '../texts/account'
 
 type Tab = 'id' | 'reset' | 'change'
@@ -136,7 +136,7 @@ export default function FindAccount() {
 
   return (
     <div className="container narrow">
-      <h1 className="mt"><Link to="/" style={{ color: 'inherit' }}>📌 입금콕</Link> 계정 찾기</h1>
+      <h1 className="mt"><Link to="/" style={{ color: 'inherit' }}><Brand /></Link> 계정 찾기</h1>
       <div className="tabs">
         {TABS.map((t) => (
           <button key={t.key} type="button" className={tab === t.key ? 'active' : ''} onClick={() => choose(t.key)}>{t.label}</button>

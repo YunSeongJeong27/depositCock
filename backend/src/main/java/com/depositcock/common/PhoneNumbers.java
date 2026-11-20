@@ -6,7 +6,7 @@ import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 
 /**
- * 휴대폰 번호 정규화. 고객 구분 키로 쓴다 (정리본 4-2장). 판매자 휴대폰(아이디·비밀번호 찾기용, 2026-11-20)도 같은 규칙.
+ * 휴대폰 번호 정규화. 고객 구분 키로 쓴다 (정리본 4-2장). 판매자 휴대폰 번호에도 씀 (2026-11-09, 그래서 order → common 으로 옮김).
  * "010-1234-5678", "010 1234 5678", "01012345678" → "01012345678"
  */
 @NoArgsConstructor(access = AccessLevel.PRIVATE)

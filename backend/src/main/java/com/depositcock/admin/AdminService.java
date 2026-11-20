@@ -6,9 +6,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import com.depositcock.admin.AdminDtos.AdminInfoRequest;
 import com.depositcock.admin.AdminDtos.AdminSellerRow;
 import com.depositcock.admin.AdminDtos.AdminUpdateRequest;
+import com.depositcock.admin.AdminDtos.SellerInfoRequest;
 import com.depositcock.common.ApiException;
 import com.depositcock.common.ErrorCode;
 import com.depositcock.common.PhoneNumbers;
@@ -18,6 +18,7 @@ import com.depositcock.groupbuy.GroupBuyRepository.SellerCount;
 import com.depositcock.seller.LoginIds;
 import com.depositcock.seller.Role;
 import com.depositcock.seller.Seller;
+import com.depositcock.seller.SellerDtos.SignupRequest;
 import com.depositcock.seller.SellerRepository;
 import com.depositcock.seller.SellerService;
 import com.depositcock.vision.CaptureUsageService;
@@ -36,6 +37,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class AdminService {
 
     private final SellerRepository sellerRepository;
+    private final SellerService sellerService;
     private final GroupBuyRepository groupBuyRepository;
     private final PasswordEncoder passwordEncoder;
     private final CaptureUsageService captureUsageService;
@@ -97,6 +99,44 @@ public class AdminService {
     }
 
     /**
+     * 판매자 정보 고치기 (2026-11-09: 관리자가 잘못 넣은 정보를 고칠 수 있게. 2026-11-20 아이디 추가, 관리자 자신도).
+     * 이메일 인증 없이 바로 바뀐다. 아이디·이메일은 다른 계정과 겹치면 안 되고, 휴대폰은 비우면 지움, 새 비밀번호는 적었을 때만.
+     * 로그인 토큰에는 판매자 id 만 들어 있어 이메일·아이디를 바꿔도 로그인은 그대로이고, 메일은 보낼 때 이메일을 읽어 새 주소로 간다.
+     * 관리자 계정 이메일도 바꿀 수 있다 (전에는 막았음): 앱이 켜질 때 관리자가 하나도 없을 때만 만들어서(ensureAdmin) 하나 더 생기지 않음.
+     * 비밀번호는 일방향 해시(BCrypt)로만 저장해서 지금 비밀번호를 보여 줄 수는 없다.
+     */
+    @Transactional
+    public void updateSellerInfo(Long sellerId, SellerInfoRequest request) {
+        Seller seller = sellerRepository.findById(sellerId)
+                .orElseThrow(() -> new ApiException(ErrorCode.SELLER_NOT_FOUND));
+        String loginId = SellerService.requireLoginId(request.loginId());
+        if (!loginId.equals(seller.getLoginId())) {
+            if (sellerRepository.existsByLoginId(loginId)) {
+                throw new ApiException(ErrorCode.LOGIN_ID_TAKEN);
+            }
+            seller.setLoginId(loginId);
+        }
+        String email = SellerService.normalizeEmail(request.email());
+        if (!email.equals(seller.getEmail())) {
+            if (sellerRepository.existsByEmail(email)) {
+                throw new ApiException(ErrorCode.EMAIL_TAKEN);
+            }
+            seller.setEmail(email);
+        }
+        seller.setDisplayName(request.displayName().trim());
+        seller.setPhone(SellerService.phoneOrNull(request.phone()));
+        if (Texts.blankToNull(request.newPassword()) != null) {
+            seller.setPasswordHash(passwordEncoder.encode(request.newPassword()));
+        }
+    }
+
+    /** 관리자가 판매자 계정을 직접 만든다 (2026-11-09: 메일로 요청받은 경우 등). 회원가입을 꺼 둬도 된다 */
+    @Transactional
+    public void createSeller(SignupRequest request) {
+        sellerService.create(request);
+    }
+
+    /**
      * 판매자 탈퇴(관리자 처리): 판매자의 공구·주문·입금 정보를 함께 파기한다 (개발 전 인터뷰 결과 8번).
      * FK 의 ON DELETE CASCADE 로 하위 데이터가 같이 지워진다.
      */
@@ -133,58 +173,5 @@ public class AdminService {
         sellerRepository.save(new Seller(loginId, normalized, null, passwordEncoder.encode(rawPassword), "관리자",
                 Role.ADMIN, now, now.plusYears(100)));
         return true;
-    }
-
-    /**
-     * 관리자가 판매자(관리자 자신 포함) 이름·이메일·휴대폰을 바꾼다 (2026-11-20). 이메일 인증 없이 바로.
-     * 이메일은 다른 계정과 겹치면 안 되고, 휴대폰은 비우면 지운다 (지우면 그 판매자는 아이디·비밀번호 찾기를 못 함)
-     */
-    @Transactional
-    public void changeInfo(Long sellerId, AdminInfoRequest request) {
-        Seller seller = find(sellerId);
-        String email = SellerService.normalizeEmail(request.email());
-        if (!email.equals(seller.getEmail()) && sellerRepository.existsByEmail(email)) {
-            throw new ApiException(ErrorCode.EMAIL_TAKEN);
-        }
-        String phone = null;
-        if (request.phone() != null && !request.phone().isBlank()) {
-            phone = PhoneNumbers.normalize(request.phone());
-            if (phone == null) {
-                throw new ApiException(ErrorCode.PHONE_INVALID);
-            }
-        }
-        seller.setDisplayName(request.displayName().trim());
-        seller.setEmail(email);
-        seller.setPhone(phone);
-    }
-
-    /** 관리자가 판매자(관리자 자신 포함) 아이디를 바꾼다 (2026-11-20). 규칙·중복 검사는 가입과 같음 */
-    @Transactional
-    public void changeLoginId(Long sellerId, String rawLoginId) {
-        Seller seller = find(sellerId);
-        String loginId = LoginIds.normalize(rawLoginId);
-        if (loginId == null) {
-            throw new ApiException(ErrorCode.LOGIN_ID_INVALID);
-        }
-        if (loginId.equals(seller.getLoginId())) {
-            return;
-        }
-        if (sellerRepository.existsByLoginId(loginId)) {
-            throw new ApiException(ErrorCode.LOGIN_ID_TAKEN);
-        }
-        seller.setLoginId(loginId);
-    }
-
-    /**
-     * 관리자가 판매자(관리자 자신 포함) 비밀번호를 새로 정한다 (2026-11-20). 이메일 인증 없이 바로 바뀐다.
-     * 비밀번호는 일방향 해시(BCrypt)로만 저장해서 지금 비밀번호를 보여 줄 수는 없다.
-     */
-    @Transactional
-    public void changePassword(Long sellerId, String rawPassword) {
-        find(sellerId).setPasswordHash(passwordEncoder.encode(rawPassword));
-    }
-
-    private Seller find(Long sellerId) {
-        return sellerRepository.findById(sellerId).orElseThrow(() -> new ApiException(ErrorCode.SELLER_NOT_FOUND));
     }
 }

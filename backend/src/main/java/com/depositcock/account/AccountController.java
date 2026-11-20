@@ -54,7 +54,7 @@ public class AccountController {
     public MeResponse signup(@Valid @RequestBody SignupRequest request, HttpServletResponse response) {
         Seller seller = accountService.signup(request);
         tokenService.writeCookie(response, tokenService.issue(seller));
-        return MeResponse.of(seller, LocalDateTime.now(clock), featureAccess.commentsAllowed(seller));
+        return toMe(seller);
     }
 
     @PostMapping("/api/auth/find-login-id")
@@ -95,6 +95,11 @@ public class AccountController {
     @PutMapping("/api/seller/phone")
     public MeResponse changePhone(@Valid @RequestBody PhoneChangeRequest request) {
         Seller seller = accountService.changePhone(CurrentSeller.id(), request.phone(), request.code());
-        return MeResponse.of(seller, LocalDateTime.now(clock), featureAccess.commentsAllowed(seller));
+        return toMe(seller);
+    }
+
+    private MeResponse toMe(Seller seller) {
+        return MeResponse.of(seller, LocalDateTime.now(clock), featureAccess.commentsAllowed(seller),
+                featureAccess.depositCaptureOpen());
     }
 }

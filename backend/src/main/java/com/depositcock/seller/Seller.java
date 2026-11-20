@@ -35,19 +35,15 @@ public class Seller extends BaseTimeEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    /** 로그인 아이디 (2026-11-20, 소문자). 관리자가 바꿀 수 있다 */
+    /** 로그인 아이디 (2026-11-20, 소문자). 관리자가 [정보 수정]으로 바꿀 수 있다 */
     @Setter
     @Column(nullable = false, unique = true)
     private String loginId;
 
-    /** 가입 이메일. 판매자는 못 바꾸고 관리자만 바꾼다 (2026-11-20) */
+    /** 관리자가 [정보 수정]으로 바꿀 수 있음 (2026-11-09). 로그인 토큰에는 id 만 들어가서 바꿔도 로그인은 그대로. 판매자는 못 바꿈 */
     @Setter
     @Column(nullable = false, unique = true)
     private String email;
-
-    /** 휴대폰 번호 (숫자만). 아이디·비밀번호 찾기에 쓴다. 환경변수로 만든 관리자 계정은 null 일 수 있다 */
-    @Setter
-    private String phone;
 
     @Setter
     @Column(nullable = false)
@@ -56,6 +52,11 @@ public class Seller extends BaseTimeEntity {
     @Setter
     @Column(nullable = false)
     private String displayName;
+
+    /** 휴대폰 번호, 숫자만 (2026-11-09). 관리자가 연락할 때·아이디/비밀번호 찾기(2026-11-20)에 씀. 휴대폰 인증은 안 함.
+     * 판매자는 내 정보에서 가입 이메일 인증번호를 넣고 바꾼다. 이 칸이 생기기 전 가입자·환경변수로 만든 관리자는 null */
+    @Setter
+    private String phone;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)

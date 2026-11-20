@@ -3,21 +3,20 @@ package com.depositcock;
 import java.util.Map;
 
 import com.depositcock.support.IntegrationTest;
-import com.fasterxml.jackson.databind.JsonNode;
 import jakarta.servlet.http.Cookie;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 /**
- * 가입 이메일 인증, 아이디 로그인, 아이디 찾기, 비밀번호 찾기·변경, 관리자의 아이디·비밀번호 변경 (2026-11-20).
+ * 가입 이메일 인증, 아이디 로그인, 아이디 찾기, 비밀번호 찾기·변경, 내 정보 휴대폰 변경 (2026-11-20).
+ * 관리자의 아이디·정보 변경은 SellerPhoneAndAdminAccountTest.
  * 메일은 TestMailbox 가 받고 테스트가 인증번호·아이디·임시 비밀번호를 읽는다.
  */
 class AccountTest extends IntegrationTest {
@@ -208,7 +207,7 @@ class AccountTest extends IntegrationTest {
     void phoneChangeNeedsEmailCode() throws Exception {
         String email = uniqueEmail();
         Cookie seller = signup(email);
-        // 내 정보 저장에 휴대폰을 같이 보내도 바뀌지 않음
+        // 내 정보 저장에 휴대폰을 같이 보내도 바뀌지 않음 (2026-11-09 에는 인증 없이 바뀌었음)
         mvc.perform(withJson(put("/api/seller/profile").cookie(seller), Map.of("displayName", "공구장",
                         "phone", "010-7777-8888")))
                 .andExpect(status().isOk())
@@ -240,67 +239,5 @@ class AccountTest extends IntegrationTest {
         // 바뀐 번호로 아이디 찾기
         mvc.perform(withJson(post("/api/auth/find-login-id"), Map.of("email", email, "phone", "010-5555-6666")))
                 .andExpect(status().isOk());
-    }
-
-    @Test
-    void adminSeesIdPhoneAndChangesIdAndPassword() throws Exception {
-        String email = uniqueEmail();
-        Cookie seller = signup(email);
-        Cookie admin = login("admin", "admin1234");
-        long sellerId = 0;
-        for (JsonNode s : read(mvc.perform(get("/api/admin/sellers").cookie(admin)).andReturn())) {
-            if (s.get("email").asText().equals(email)) {
-                sellerId = s.get("id").asLong();
-                assertThat(s.get("loginId").asText()).isEqualTo(loginIdOf(email));
-                assertThat(s.get("phone").asText()).isEqualTo(PHONE);
-                assertThat(s.has("passwordHash")).isFalse();
-            }
-        }
-        assertThat(sellerId).isPositive();
-
-        // 판매자는 관리자 기능을 못 씀
-        mvc.perform(withJson(put("/api/admin/sellers/" + sellerId + "/password").cookie(seller),
-                Map.of("password", "hacked123"))).andExpect(status().isForbidden());
-
-        // 아이디: 형식·중복 검사
-        mvc.perform(withJson(put("/api/admin/sellers/" + sellerId + "/login-id").cookie(admin),
-                Map.of("loginId", "x"))).andExpect(jsonPath("$.code").value("LOGIN_ID_INVALID"));
-        mvc.perform(withJson(put("/api/admin/sellers/" + sellerId + "/login-id").cookie(admin),
-                Map.of("loginId", "admin"))).andExpect(jsonPath("$.code").value("LOGIN_ID_TAKEN"));
-        String newId = uniqueLoginId();
-        mvc.perform(withJson(put("/api/admin/sellers/" + sellerId + "/login-id").cookie(admin),
-                Map.of("loginId", newId))).andExpect(status().isOk());
-        // 비밀번호: 이메일 인증 없이 바로
-        mvc.perform(withJson(put("/api/admin/sellers/" + sellerId + "/password").cookie(admin),
-                Map.of("password", "short"))).andExpect(jsonPath("$.code").value("PASSWORD_LENGTH"));
-        mvc.perform(withJson(put("/api/admin/sellers/" + sellerId + "/password").cookie(admin),
-                Map.of("password", "byadmin789"))).andExpect(status().isOk());
-        login(newId, "byadmin789");
-        mvc.perform(withJson(post("/api/auth/login"), Map.of("loginId", loginIdOf(email), "password", "password123")))
-                .andExpect(status().isUnauthorized());
-
-        // 이름·이메일·휴대폰: 이메일 중복·휴대폰 형식 검사, 그 밖에는 인증 없이 바로
-        String info = "/api/admin/sellers/" + sellerId + "/info";
-        mvc.perform(withJson(put(info).cookie(admin), Map.of("displayName", "새이름", "email", "admin@test.local",
-                "phone", PHONE))).andExpect(jsonPath("$.code").value("EMAIL_TAKEN"));
-        mvc.perform(withJson(put(info).cookie(admin), Map.of("displayName", "새이름", "email", email, "phone", "02-123-4567")))
-                .andExpect(jsonPath("$.code").value("PHONE_INVALID"));
-        String newEmail = uniqueEmail();
-        mvc.perform(withJson(put(info).cookie(admin), Map.of("displayName", "새이름", "email", newEmail.toUpperCase(),
-                "phone", "010-4444-5555"))).andExpect(status().isOk());
-        mvc.perform(get("/api/me").cookie(login(newId, "byadmin789")))
-                .andExpect(jsonPath("$.displayName").value("새이름"))
-                .andExpect(jsonPath("$.email").value(newEmail))
-                .andExpect(jsonPath("$.phone").value("010-4444-5555"));
-        mvc.perform(withJson(post("/api/auth/find-login-id"), Map.of("email", newEmail, "phone", "010-4444-5555")))
-                .andExpect(status().isOk());
-        assertThat(mailbox.lastBodyTo(newEmail)).contains("아이디: " + newId);
-        // 휴대폰을 비우면 지움
-        java.util.Map<String, Object> clear = new java.util.HashMap<>();
-        clear.put("displayName", "새이름");
-        clear.put("email", newEmail);
-        clear.put("phone", "");
-        mvc.perform(withJson(put(info).cookie(admin), clear)).andExpect(status().isOk());
-        mvc.perform(get("/api/me").cookie(login(newId, "byadmin789"))).andExpect(jsonPath("$.phone").isEmpty());
     }
 }

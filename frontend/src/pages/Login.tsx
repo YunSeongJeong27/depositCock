@@ -1,13 +1,14 @@
 import { useState, type FormEvent } from 'react'
 import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import { api, errorMessage } from '../api'
-import { useAuth } from '../auth'
-import { ErrorBox } from '../components/Ui'
+import { useAuth, useSignupOpen } from '../auth'
+import { Brand, ErrorBox } from '../components/Ui'
 import { accountText as T } from '../texts/account'
 import type { Me } from '../types'
 
 export default function Login() {
   const { setMe } = useAuth()
+  const signupOpen = useSignupOpen()
   const navigate = useNavigate()
   const [loginId, setLoginId] = useState('')
   const [password, setPassword] = useState('')
@@ -32,7 +33,7 @@ export default function Login() {
 
   return (
     <div className="container narrow">
-      <h1 className="mt"><Link to="/" style={{ color: 'inherit' }}>📌 입금콕</Link> 로그인</h1>
+      <h1 className="mt"><Link to="/" style={{ color: 'inherit' }}><Brand /></Link> 로그인</h1>
       {params.get('expired') && <div className="warn-box">{T.loginExpired}</div>}
       <form className="card" onSubmit={submit}>
         <label className="field"><span>아이디</span>
@@ -47,7 +48,9 @@ export default function Login() {
       <p className="muted small">
         <Link to="/find-account?tab=id">아이디 찾기</Link> · <Link to="/find-account?tab=reset">비밀번호 찾기</Link> · <Link to="/find-account?tab=change">비밀번호 변경</Link>
       </p>
-      <p className="muted">계정이 없나요? <Link to="/signup">회원가입</Link></p>
+      {signupOpen === false
+        ? <p className="muted">{T.signupClosed}</p>
+        : <p className="muted">계정이 없나요? <Link to="/signup">회원가입</Link></p>}
     </div>
   )
 }

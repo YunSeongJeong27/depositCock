@@ -156,7 +156,7 @@ public final class DepositDtos {
                                 LocalDateTime createdAt) {
     }
 
-    /** 은행 헤더(컬럼) 설정 화면 한 번에: 은행별 헤더(컬럼)명 + 입금자 별칭 */
+    /** 입금 대조 은행 설정 화면 한 번에: 은행별 헤더(컬럼)명 + 입금자 별칭 */
     public record BankSettingsResponse(List<BankHeaderView> banks, List<AliasResponse> aliases) {
     }
 

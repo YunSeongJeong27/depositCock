@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useState, type FormEvent, type ReactNode } from 'react'
 import { useParams } from 'react-router-dom'
 import { ApiError, api, dateTime, errorMessage, itemsText, receiveText, won } from '../../api'
-import { CopyButton, ErrorBox, Rich, StatusBadge } from '../../components/Ui'
+import { Brand, CopyButton, ErrorBox, Rich, StatusBadge } from '../../components/Ui'
 import { orderText as T } from '../../texts/order'
 import type { PaymentMethod, ReceiveMethod, ShippingFeeType } from '../../types'
 
@@ -46,7 +46,7 @@ interface MyOrder {
 }
 interface Prefill {
   phone: string; depositorName: string; nickname: string | null; unitAddress: string | null; receiveMethod: ReceiveMethod
-  pickupPointId: number | null; paymentMethod: PaymentMethod; recipientName: string | null; recipientPhone: string | null
+  pickupPointId: number | null; paymentMethod: PaymentMethod
   zipcode: string | null; address: string | null; addressDetail: string | null
   /** true: 이 기기에서 넣은 주문이 아니라(내 주문 찾기) 휴대폰·동호수·배송지는 비어 있음 */
   limited: boolean
@@ -72,7 +72,7 @@ const emptyCancel = {
 }
 /** 방금 넣거나 바꾼 주문의 최종 내용 (이번에 적은 값만 들어 있음) */
 interface FinalOrder {
-  order: MyOrder; nickname: string | null; unitAddress: string | null; recipientName: string | null; recipientPhone: string | null
+  order: MyOrder; nickname: string | null; unitAddress: string | null
   zipcode: string | null; address: string | null; addressDetail: string | null
 }
 /** changed: 새 주문이 아니라 같은 번호의 기존 주문(orderNo)을 바꿈 */
@@ -123,7 +123,7 @@ function OrderSummary({ o, title, f }: { o: MyOrder; title: ReactNode; f?: Final
       <div className="small mt">
         <div>수령: {receiveText(o)}</div>
         {o.receiveMethod === 'DELIVERY' && f && (
-          <div>배송지: {f.recipientName} · {f.recipientPhone} · {f.zipcode ? `${f.zipcode} ` : ''}{f.address}{f.addressDetail ? ' ' + f.addressDetail : ''}</div>
+          <div>배송지: {f.zipcode ? `${f.zipcode} ` : ''}{f.address}{f.addressDetail ? ' ' + f.addressDetail : ''}</div>
         )}
         <div>결제: {o.paymentMethod === 'PREPAID' ? `선입금 · 입금자명 ${o.depositorName}` : `현장결제 · 이름 ${o.depositorName}`}</div>
         {f?.nickname && <div>닉네임: {f.nickname}</div>}
@@ -176,6 +176,10 @@ function MyOrdersCard({ view, onEdit, onCancel }: {
           {confirmedOrder(o) && <div className="small muted mt">{T.confirmedCannotEdit}</div>}
         </div>
       ))}
+      {/* 취소한 주문이 있으면 다시 주문해도 된다는 안내 한 줄 (주문서가 열려 있을 때만, 2026-11-09) */}
+      {view.acceptingOrders && !view.paused && view.myOrders.some((o) => o.status === 'CANCELLED') && (
+        <div className="small muted" style={{ borderTop: '1px solid var(--line)', paddingTop: 10 }}>{T.reorderAfterCancel}</div>
+      )}
     </div>
   )
 }
@@ -222,14 +226,14 @@ function IdentifyCard({ base, kakaoInquiryUrl, onFound }: { base: string; kakaoI
 
 const emptyForm = {
   phone: '', depositorName: '', nickname: '', unitAddress: '', receiveMethod: '' as ReceiveMethod | '', pickupPointId: '',
-  paymentMethod: '' as PaymentMethod | '', recipientName: '', recipientPhone: '', zipcode: '', address: '', addressDetail: '',
+  paymentMethod: '' as PaymentMethod | '', zipcode: '', address: '', addressDetail: '',
 }
 
 function formFrom(p: Prefill): typeof emptyForm {
   return {
     phone: p.phone ?? '', depositorName: p.depositorName ?? '', nickname: p.nickname ?? '', unitAddress: p.unitAddress ?? '',
     receiveMethod: p.receiveMethod ?? '', pickupPointId: p.pickupPointId ? String(p.pickupPointId) : '', paymentMethod: p.paymentMethod ?? '',
-    recipientName: p.recipientName ?? '', recipientPhone: p.recipientPhone ?? '', zipcode: p.zipcode ?? '', address: p.address ?? '',
+    zipcode: p.zipcode ?? '', address: p.address ?? '',
     addressDetail: p.addressDetail ?? '',
   }
 }
@@ -281,7 +285,7 @@ export default function PublicOrder() {
         items: view.products.map((p) => ({ productId: p.id, quantity: qty[p.id] ?? 0 })).filter((i) => i.quantity > 0),
         phone: form.phone, depositorName: form.depositorName, nickname: form.nickname || null, unitAddress: form.unitAddress || null,
         receiveMethod: receive || null, pickupPointId: form.pickupPointId ? Number(form.pickupPointId) : null, paymentMethod: payment || null,
-        recipientName: form.recipientName || null, recipientPhone: form.recipientPhone || null, zipcode: form.zipcode || null,
+        zipcode: form.zipcode || null,
         address: form.address || null, addressDetail: form.addressDetail || null,
         // [주문 수정]은 고객이 주문을 직접 고른 것이라 경고 없이 그 주문을 수정 (서버가 수정할 수 없으면 다시 경고)
         acknowledgeWarnings: acknowledge || editing !== null,
@@ -402,7 +406,7 @@ export default function PublicOrder() {
     }
   }
 
-  if (loadError) return <div className="container narrow"><h2>📌 입금콕</h2><ErrorBox message={loadError} /></div>
+  if (loadError) return <div className="container narrow"><h2><Brand /></h2><ErrorBox message={loadError} /></div>
   if (!view) return <div className="page-loading">불러오는 중…</div>
   const set = (k: keyof typeof emptyForm, v: string) => setForm((f) => ({ ...f, [k]: v }))
   /**
@@ -530,8 +534,6 @@ export default function PublicOrder() {
 
           {receive === 'DELIVERY' && (
             <div className="mt">
-              <label className="field"><span>받는 분 *</span><input type="text" value={form.recipientName} onChange={(e) => set('recipientName', e.target.value)} required /></label>
-              <label className="field"><span>받는 분 연락처 *</span><input type="tel" value={form.recipientPhone} onChange={(e) => set('recipientPhone', e.target.value)} required placeholder="010-0000-0000" /></label>
               <div className="field"><span style={{ fontWeight: 600, display: 'block', marginBottom: 4 }}>주소 *</span>
                 <div className="row">
                   <input type="text" value={form.zipcode} readOnly placeholder="우편번호" style={{ width: 110 }} />
@@ -552,8 +554,8 @@ export default function PublicOrder() {
                 ? <span className="muted small" style={{ fontWeight: 400 }}>{T.depositorHintOnsite}</span>
                 : <span className="small" style={{ color: 'var(--danger)' }}>{T.depositorHintTransfer}</span>}
             </label>
-            <label className="field"><span>{view.nicknameRequired ? '닉네임 *' : '닉네임 (선택)'}</span><input type="text" value={form.nickname} onChange={(e) => set('nickname', e.target.value)} required={view.nicknameRequired} /></label>
-            {view.unitAddressFieldEnabled && <label className="field"><span>동·호수 *</span><input type="text" value={form.unitAddress} onChange={(e) => set('unitAddress', e.target.value)} required placeholder="예: 101동 1203호" /></label>}
+            <label className="field"><span>{view.nicknameRequired ? '닉네임 *' : '닉네임 (선택)'}</span><input type="text" value={form.nickname} onChange={(e) => set('nickname', e.target.value)} required={view.nicknameRequired} placeholder={T.nicknamePlaceholder} /></label>
+            {view.unitAddressFieldEnabled && <label className="field"><span>동·호수 *</span><input type="text" value={form.unitAddress} onChange={(e) => set('unitAddress', e.target.value)} required /></label>}
           </div>
 
           <div className="card" style={{ background: '#f9fafb' }}>
@@ -638,8 +640,8 @@ export default function PublicOrder() {
             <label className="field"><span>주문할 때 적은 입금자명</span><input type="text" value={cancel.depositorName} onChange={(e) => setCancel({ ...cancel, depositorName: e.target.value, choices: [] })} required /></label>
             {cancel.mode === 'refund' && (
               <>
-                <label className="field"><span>환불받을 은행</span><input type="text" value={cancel.bankName} onChange={(e) => setCancel({ ...cancel, bankName: e.target.value })} required maxLength={30} placeholder="예: 국민은행" /></label>
-                <label className="field"><span>계좌번호</span><input type="text" inputMode="numeric" value={cancel.accountNumber} onChange={(e) => setCancel({ ...cancel, accountNumber: e.target.value })} required maxLength={30} placeholder="예: 123-456-789012" /></label>
+                <label className="field"><span>환불받을 은행</span><input type="text" value={cancel.bankName} onChange={(e) => setCancel({ ...cancel, bankName: e.target.value })} required maxLength={30} /></label>
+                <label className="field"><span>계좌번호</span><input type="text" inputMode="numeric" value={cancel.accountNumber} onChange={(e) => setCancel({ ...cancel, accountNumber: e.target.value })} required maxLength={30} /></label>
               </>
             )}
             {cancelTarget && cancel.choices.length === 0 && (
@@ -671,7 +673,6 @@ export default function PublicOrder() {
           </form>
         )}
       </div>}
-      <footer className="footer">📌 입금콕 · <a href="/privacy">개인정보처리방침</a></footer>
     </div>
   )
 }

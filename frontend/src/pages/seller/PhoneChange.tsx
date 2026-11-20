@@ -68,7 +68,7 @@ export default function PhoneChange() {
         <b>{me.phone ?? '없음'}</b>
         {!open && <button type="button" className="btn small" onClick={start}>변경</button>}
       </div>
-      <div className="muted small">{T.phoneHint}</div>
+      <div className="muted small">{T.sellerPhoneHint}</div>
       {done && <div className="success-box">{T.phoneChanged}</div>}
       {open && (
         <form className="mt" onSubmit={submit}>

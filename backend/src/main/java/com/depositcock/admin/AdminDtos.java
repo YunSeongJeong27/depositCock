@@ -56,25 +56,17 @@ public final class AdminDtos {
             Boolean commentFeatureEnabled) {
     }
 
-    /** 관리자가 아이디 바꾸기 (2026-11-20) */
-    public record AdminLoginIdRequest(
-            @NotBlank(message = "LOGIN_ID_REQUIRED") @Size(max = 30, message = "LOGIN_ID_TOO_LONG") String loginId) {
-    }
-
-    /** 관리자가 판매자 정보(이름·이메일·휴대폰) 바꾸기 (2026-11-20). 휴대폰은 비우면 지움 */
-    public record AdminInfoRequest(
-            @NotBlank(message = "SELLER_NAME_REQUIRED") @Size(max = 100, message = "SELLER_NAME_TOO_LONG") String displayName,
+    /** 판매자 정보 고치기 (관리자, 2026-11-09, 2026-11-20 아이디 추가). 새 비밀번호는 바꿀 때만, 휴대폰 번호는 비우면 지움 */
+    public record SellerInfoRequest(
+            @NotBlank(message = "LOGIN_ID_REQUIRED") @Size(max = 30, message = "LOGIN_ID_TOO_LONG") String loginId,
             @NotBlank(message = "EMAIL_REQUIRED") @Email(message = "EMAIL_INVALID")
             @Size(max = 255, message = "EMAIL_TOO_LONG") String email,
-            @Size(max = 30, message = "PHONE_TOO_LONG") String phone) {
+            @NotBlank(message = "SELLER_NAME_REQUIRED") @Size(max = 100, message = "SELLER_NAME_TOO_LONG") String displayName,
+            @Size(max = 30, message = "PHONE_INVALID") String phone,
+            @Size(min = 8, max = 100, message = "PASSWORD_LENGTH") String newPassword) {
     }
 
-    /** 관리자가 비밀번호 새로 정하기 (2026-11-20) */
-    public record AdminPasswordRequest(
-            @NotBlank(message = "PASSWORD_REQUIRED") @Size(min = 8, max = 100, message = "PASSWORD_LENGTH") String password) {
-    }
-
-    /** 서비스 전체 설정 (관리자) */
-    public record AdminSettings(boolean commentFeatureOpen) {
+    /** 서비스 전체 설정 (관리자). 바꿀 때는 보낸 값만 바꾸고 null 은 그대로 둔다 */
+    public record AdminSettings(Boolean commentFeatureOpen, Boolean signupOpen, Boolean depositCaptureOpen) {
     }
 }

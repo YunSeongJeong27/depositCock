@@ -51,7 +51,7 @@ export default function OrdersTab({ groupBuy, orders, reload }: Props) {
       if ((filter === 'finished') !== o.finished) return false
       if (filter === 'samenick' && o.sameNicknameOrderNos.length === 0) return false
       const q = query.trim()
-      if (q && ![o.depositorName, o.nickname, o.phone, o.recipientName, String(o.orderNo)].some((v) => v?.includes(q))
+      if (q && ![o.depositorName, o.nickname, o.phone, String(o.orderNo)].some((v) => v?.includes(q))
         && !(/^[\d-]+$/.test(q) && o.phone?.replace(/\D/g, '').includes(q.replace(/\D/g, '')))) return false
       return true
     })
@@ -147,7 +147,7 @@ export default function OrdersTab({ groupBuy, orders, reload }: Props) {
           주문 {dateTime(o.orderedAt)} · 최종 변경 {dateTime(o.updatedAt)}
           {o.phone && <> · 휴대폰 {o.phone}</>}
           {o.unitAddress && <> · 동·호수 {o.unitAddress}</>}
-          {o.receiveMethod === 'DELIVERY' && <div>배송: {o.recipientName} / {o.recipientPhone} / ({o.zipcode}) {o.address} {o.addressDetail}</div>}
+          {o.receiveMethod === 'DELIVERY' && <div>배송: {o.zipcode ? `(${o.zipcode}) ` : ''}{o.address} {o.addressDetail}</div>}
           {o.shippingFee > 0 && <div>상품 {won(o.itemsAmount)} + 배송비 {won(o.shippingFee)}</div>}
           {o.payments.map((p, i) => (
             <div key={i} className={p.cancelledAt ? 'muted' : undefined}>

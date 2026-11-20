@@ -1,4 +1,4 @@
-import { josa } from './common'
+import { SUPPORT_EMAIL } from './common'
 
 /** 로그인·가입, 아이디·비밀번호 찾기, 내 정보(알림·탈퇴), 관리자 화면의 긴 문장. 규칙은 common.ts 맨 위 */
 export const accountText = {
@@ -6,8 +6,9 @@ export const accountText = {
   loginExpired: '로그인이 만료되었습니다. 다시 로그인해 주세요.',
   agreeRequired: '이용약관과 개인정보처리방침에 동의해 주세요.',
   displayNameHint: '고객 화면에 보이는 이름입니다.',
+  sellerPhoneHint: '아이디·비밀번호를 찾을 때와 입금콕 운영자가 연락할 때 씁니다.',
+  signupClosed: `관리자가 잠시 회원가입을 비활성화 했습니다. ${SUPPORT_EMAIL} 으로 문의해주시면 바로 안내해드리겠습니다.`,
   loginIdHint: '영문 소문자로 시작해 영문 소문자·숫자·밑줄 4~20자',
-  phoneHint: '아이디·비밀번호를 찾을 때 씁니다.',
   codeSent: (minutes: number) => `인증번호를 메일로 보냈습니다. ${minutes}분 안에 입력해 주세요. 메일이 안 보이면 스팸함도 확인해 주세요.`,
   emailVerified: '이메일 인증을 마쳤습니다.',
   verifyEmailFirst: '이메일 인증을 먼저 해 주세요.',
@@ -41,11 +42,18 @@ export const accountText = {
   commentOpenAll: '모든 판매자에게 열려 있습니다.',
   commentClosed: '닫혀 있습니다. 아래 표에서 "댓글 기능"을 체크한 판매자만 씁니다. 주문 링크·입금 대조는 상관없이 씁니다.',
   commentFeatureTitle: '전체 공개가 꺼져 있을 때 이 판매자만 댓글 주문 기능을 쓰게 함',
-  adminPasswordNote: '비밀번호는 되돌릴 수 없게 암호화해 저장해서 지금 비밀번호는 누구도 볼 수 없습니다. 새 비밀번호를 정하면 이메일 인증 없이 바로 바뀝니다.',
-  confirmAdminLoginId: (from: string, to: string) => `아이디를 ${from}에서 ${to}${josa(to, '으로/로')} 바꿉니다. 판매자에게 새 아이디를 알려 주세요. 계속할까요?`,
-  confirmAdminPassword: (loginId: string) => `${loginId} 계정의 비밀번호를 바꿉니다. 판매자에게 새 비밀번호를 알려 주세요. 계속할까요?`,
-  adminInfoNote: '이메일·휴대폰은 인증 없이 바로 바뀝니다. 이메일을 바꾸면 알림·계정 메일이 새 이메일로 갑니다. 휴대폰을 비우면 그 판매자는 아이디·비밀번호 찾기를 못 합니다.',
-  adminInfoSaved: '정보를 저장했습니다.',
-  adminLoginIdChanged: '아이디를 바꿨습니다.',
-  adminPasswordChanged: '비밀번호를 바꿨습니다.',
+  createSellerHelp: '메일 등으로 요청받은 판매자 계정을 만듭니다. 회원가입을 꺼 둬도 만들 수 있고 이메일 인증도 거치지 않습니다. 만든 뒤 아이디와 비밀번호를 판매자에게 알려 주세요.',
+  editSellerHelp: '새 비밀번호는 바꿀 때만 적으세요. 아이디·이메일·비밀번호를 바꾸면 판매자는 다음 로그인부터 새 값으로 로그인합니다. 이메일 인증 없이 바로 바뀝니다. 휴대폰을 비우면 그 판매자는 아이디·비밀번호 찾기를 못 합니다.',
+  adminPasswordNote: '지금 비밀번호는 되돌릴 수 없게 암호화해 저장해서 누구도 볼 수 없습니다. 바꾸려면 새 비밀번호를 적으세요.',
+  sellerCreated: '계정을 만들었습니다. 아이디와 비밀번호를 판매자에게 알려 주세요.',
+  sellerInfoSaved: '판매자 정보를 저장했습니다. 아이디나 비밀번호를 바꿨다면 판매자에게 알려 주세요.',
+  depositCaptureNote: '입금 대조 화면의 ①-2',
+  depositCaptureOnNow: '판매자 입금 대조 화면에 "은행앱 화면 캡처로 올리기"가 보입니다.',
+  depositCaptureOffNow: '판매자 입금 대조 화면에서 "은행앱 화면 캡처로 올리기"가 숨겨지고 서버도 막습니다. 거래내역 파일로 올리기는 그대로 씁니다. 댓글 캡처는 위 댓글 주문 기능 설정을 따릅니다.',
+  confirmDepositCaptureOpen: '판매자에게 "은행앱 화면 캡처로 올리기"를 다시 보여 줍니다. 계속할까요?',
+  confirmDepositCaptureClose: '판매자 입금 대조 화면에서 "은행앱 화면 캡처로 올리기"를 숨기고 막습니다. 거래내역 파일로 올리기는 그대로 씁니다. 계속할까요?',
+  signupOpenNow: '새 판매자가 회원가입할 수 있습니다.',
+  signupClosedNow: '새 판매자가 회원가입할 수 없습니다. 첫 화면·로그인·회원가입 화면의 가입 버튼이 꺼집니다. 이미 가입한 판매자는 그대로 씁니다.',
+  confirmSignupOpen: '새 판매자 회원가입을 다시 받습니다. 계속할까요?',
+  confirmSignupClose: '새 판매자 회원가입을 막습니다. 첫 화면·로그인·회원가입 화면의 가입 버튼이 꺼집니다. 이미 가입한 판매자는 그대로 씁니다. 계속할까요?',
 }

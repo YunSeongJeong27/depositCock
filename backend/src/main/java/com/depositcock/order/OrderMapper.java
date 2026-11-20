@@ -98,8 +98,6 @@ final class OrderMapper {
                 .receiveMethod(o.getReceiveMethod())
                 .pickupPointId(o.getPickupPoint() == null ? null : o.getPickupPoint().getId())
                 .pickupPointName(o.getPickupPoint() == null ? null : o.getPickupPoint().getName())
-                .recipientName(o.getRecipientName())
-                .recipientPhone(PhoneNumbers.format(o.getRecipientPhone()))
                 .zipcode(o.getZipcode())
                 .address(o.getAddress())
                 .addressDetail(o.getAddressDetail())

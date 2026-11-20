@@ -36,7 +36,7 @@ public class DepositController {
     private final DepositService service;
     private final BankHeaders bankHeaders;
 
-    /** 은행 헤더(컬럼) 설정 화면 한 번에: 은행별 헤더(컬럼)명 + 입금자 별칭 (2026-10-27) */
+    /** 입금 대조 은행 설정 화면 한 번에: 은행별 헤더(컬럼)명 + 입금자 별칭 (2026-10-27) */
     @GetMapping("/api/seller/bank-settings")
     public BankSettingsResponse bankSettings() {
         return service.bankSettings(CurrentSeller.id());

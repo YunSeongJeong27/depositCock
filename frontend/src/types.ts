@@ -6,7 +6,7 @@ export interface Me {
   /** 로그인 아이디 (2026-11-20) */
   loginId: string
   email: string
-  /** 휴대폰 010-1234-5678 모양. 아이디·비밀번호 찾기에 씀 (관리자는 없을 수 있음) */
+  /** 휴대폰 번호 010-1234-5678 모양 (2026-11-09). 아이디·비밀번호 찾기에도 씀. 이 칸이 생기기 전 가입자·관리자는 null */
   phone: string | null
   displayName: string
   role: Role
@@ -20,6 +20,8 @@ export interface Me {
   defaultAccountHolder: string | null
   /** 댓글 주문 기능을 쓸 수 있는지 (관리자가 전체 공개했거나 이 판매자에게 허용) */
   commentFeatureEnabled: boolean
+  /** 입금 대조 "은행앱 화면 캡처로 올리기"를 쓸 수 있는지 (관리자가 켜고 끔, 2026-11-09) */
+  depositCaptureEnabled: boolean
   /** 공구를 만든 뒤 뜨는 "제품 판매 TIP"을 다시 보지 않기로 했는지 (2026-10-26) */
   salesTipHidden: boolean
   /** 알림 켜짐/꺼짐 (2026-10-19, 모든 종류가 옴) */
@@ -142,8 +144,6 @@ export interface SellerOrder {
   receiveMethod: ReceiveMethod
   pickupPointId: number | null
   pickupPointName: string | null
-  recipientName: string | null
-  recipientPhone: string | null
   zipcode: string | null
   address: string | null
   addressDetail: string | null

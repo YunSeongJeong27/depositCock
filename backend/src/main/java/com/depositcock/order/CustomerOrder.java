@@ -79,10 +79,6 @@ public class CustomerOrder extends BaseTimeEntity {
     private PickupPoint pickupPoint;
 
     @Setter
-    private String recipientName;
-    @Setter
-    private String recipientPhone;
-    @Setter
     private String zipcode;
     @Setter
     private String address;

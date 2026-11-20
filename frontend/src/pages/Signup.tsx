@@ -1,8 +1,8 @@
 import { useState, type FormEvent } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { api, errorMessage } from '../api'
-import { useAuth } from '../auth'
-import { ErrorBox } from '../components/Ui'
+import { useAuth, useSignupOpen } from '../auth'
+import { Brand, ErrorBox } from '../components/Ui'
 import { accountText as T } from '../texts/account'
 import type { Me } from '../types'
 
@@ -12,6 +12,7 @@ import type { Me } from '../types'
  */
 export default function Signup() {
   const { setMe } = useAuth()
+  const signupOpen = useSignupOpen()
   const navigate = useNavigate()
   const [form, setForm] = useState({ loginId: '', password: '', displayName: '', email: '', phone: '' })
   const [code, setCode] = useState('')
@@ -88,7 +89,7 @@ export default function Signup() {
 
   return (
     <div className="container narrow">
-      <h1 className="mt"><Link to="/" style={{ color: 'inherit' }}>📌 입금콕</Link> 회원가입</h1>
+      <h1 className="mt"><Link to="/" style={{ color: 'inherit' }}><Brand /></Link> 회원가입</h1>
       <form className="card" onSubmit={submit}>
         <label className="field"><span>아이디</span>
           <input type="text" value={form.loginId} onChange={(e) => setForm({ ...form, loginId: e.target.value })} required
@@ -99,7 +100,7 @@ export default function Signup() {
           <input type="password" minLength={8} value={form.password} onChange={(e) => setForm({ ...form, password: e.target.value })} required autoComplete="new-password" />
         </label>
         <label className="field"><span>판매자 이름</span>
-          <input type="text" value={form.displayName} onChange={(e) => setForm({ ...form, displayName: e.target.value })} required placeholder="예: 달콤 과일가게" />
+          <input type="text" value={form.displayName} onChange={(e) => setForm({ ...form, displayName: e.target.value })} required />
           <span className="muted small" style={{ fontWeight: 400 }}>{T.displayNameHint}</span>
         </label>
         <div className="field">
@@ -111,7 +112,7 @@ export default function Signup() {
               onKeyDown={(e) => { if (e.key === 'Enter' && !verified) { e.preventDefault(); if (form.email.trim() && !busy) sendCode() } }} />
             {verified
               ? <span className="badge badge-PAID">인증 완료</span>
-              : <button type="button" className="btn" disabled={busy || !form.email.trim()} onClick={sendCode}>
+              : <button type="button" className="btn" disabled={busy || !form.email.trim() || signupOpen === false} onClick={sendCode}>
                   {sentTo === form.email.trim() ? '인증번호 다시 받기' : '인증번호 받기'}
                 </button>}
           </div>
@@ -130,14 +131,15 @@ export default function Signup() {
         <label className="field"><span>휴대폰 번호</span>
           <input type="tel" value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} required
             placeholder="010-0000-0000" autoComplete="tel" />
-          <span className="muted small" style={{ fontWeight: 400 }}>{T.phoneHint}</span>
+          <span className="muted small" style={{ fontWeight: 400 }}>{T.sellerPhoneHint}</span>
         </label>
         <label className="check">
           <input type="checkbox" checked={agree} onChange={(e) => setAgree(e.target.checked)} />
           <span><Link to="/terms" target="_blank">이용약관</Link>과 <Link to="/privacy" target="_blank">개인정보처리방침</Link>에 동의합니다.</span>
         </label>
         <ErrorBox message={error} />
-        <button className="btn primary block" disabled={busy}>가입하고 첫 달 무료로 시작</button>
+        <button className="btn primary block" disabled={busy || signupOpen === false}>가입하고 첫 달 무료로 시작</button>
+        {signupOpen === false && <p className="small">{T.signupClosed}</p>}
       </form>
       <p className="muted">이미 계정이 있나요? <Link to="/login">로그인</Link></p>
     </div>

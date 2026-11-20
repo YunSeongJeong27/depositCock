@@ -48,7 +48,7 @@ app:
   data-key: ${APP_DATA_KEY:}
   cookie-secure: false
   trial-days: 30
-  # 최초 관리자 계정. 이메일·비밀번호가 비어 있으면 만들지 않는다. 아이디는 기본 admin (2026-11-20)
+  # 최초 관리자 계정. 관리자가 하나도 없을 때만 만든다. 이메일·비밀번호가 비어 있으면 만들지 않는다. 아이디는 기본 admin (2026-11-20)
   admin-login-id: ${APP_ADMIN_LOGIN_ID:admin}
   admin-email: ${APP_ADMIN_EMAIL:}
   admin-password: ${APP_ADMIN_PASSWORD:}

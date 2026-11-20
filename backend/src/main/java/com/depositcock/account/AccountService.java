@@ -8,6 +8,7 @@ import com.depositcock.common.ApiException;
 import com.depositcock.common.ErrorCode;
 import com.depositcock.common.PhoneNumbers;
 import com.depositcock.notification.AccountMailer;
+import com.depositcock.seller.FeatureAccess;
 import com.depositcock.seller.Seller;
 import com.depositcock.seller.SellerDtos.SignupRequest;
 import com.depositcock.seller.SellerRepository;
@@ -41,12 +42,17 @@ public class AccountService {
     private static final SecureRandom RANDOM = new SecureRandom();
 
     private final SellerService sellerService;
+    private final FeatureAccess featureAccess;
     private final SellerRepository sellerRepository;
     private final EmailVerificationService verifications;
     private final AccountMailer mailer;
     private final PasswordEncoder passwordEncoder;
 
+    /** 관리자가 회원가입을 꺼 두면(2026-11-09) 인증번호도 보내지 않는다 */
     public void sendSignupCode(String rawEmail) {
+        if (!featureAccess.signupOpen()) {
+            throw new ApiException(ErrorCode.SIGNUP_CLOSED);
+        }
         String email = SellerService.normalizeEmail(rawEmail);
         if (sellerRepository.existsByEmail(email)) {
             throw new ApiException(ErrorCode.EMAIL_TAKEN);
@@ -60,7 +66,7 @@ public class AccountService {
         verifications.verify(VerificationPurpose.SIGNUP, SellerService.normalizeEmail(rawEmail), null, code);
     }
 
-    /** 아이디·이메일·휴대폰 검사(SellerService)를 먼저 하고 인증을 쓴다. 인증이 없으면 판매자 저장도 되돌아간다 */
+    /** 가입 받기·아이디·이메일·휴대폰 검사(SellerService.signup)를 먼저 하고 인증을 쓴다. 인증이 없으면 판매자 저장도 되돌아간다 */
     public Seller signup(SignupRequest request) {
         Seller seller = sellerService.signup(request);
         verifications.consume(VerificationPurpose.SIGNUP, seller.getEmail(), null);

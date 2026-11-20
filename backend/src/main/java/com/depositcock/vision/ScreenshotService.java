@@ -24,6 +24,7 @@ import com.depositcock.deposit.DepositService;
 import com.depositcock.deposit.DepositSource;
 import com.depositcock.groupbuy.GroupBuy;
 import com.depositcock.groupbuy.GroupBuyService;
+import com.depositcock.seller.FeatureAccess;
 import com.depositcock.vision.OverlapDeduplicator.Item;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -45,6 +46,7 @@ public class ScreenshotService {
     private final DepositService depositService;
     private final CaptureUsageService usageService;
     private final CommentService commentService;
+    private final FeatureAccess featureAccess;
 
     public record DepositDraft(String name, long amount, String datetime, String type, boolean duplicateSuspected,
                                int imageIndex) {
@@ -66,6 +68,7 @@ public class ScreenshotService {
 
     public DepositExtractResponse extractDeposits(Long sellerId, Long groupBuyId, List<MultipartFile> files) {
         groupBuyService.getOwned(sellerId, groupBuyId);
+        featureAccess.requireDepositCapture();
         if (!extractor.available()) {
             return new DepositExtractResponse(List.of(), 0, extractor.provider(), notConfigured(), false, null);
         }
@@ -99,6 +102,7 @@ public class ScreenshotService {
 
     public DepositService.SaveResult saveDeposits(Long sellerId, Long groupBuyId, List<SaveRow> rows) {
         GroupBuy groupBuy = groupBuyService.getOwned(sellerId, groupBuyId);
+        featureAccess.requireDepositCapture();
         List<DepositLine> lines = new ArrayList<>();
         int no = 0;
         for (SaveRow r : rows) {

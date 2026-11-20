@@ -192,16 +192,18 @@ class M2OrderFormTest extends IntegrationTest {
         Opened g = openGroupBuy(body);
 
         Map<String, Object> o = order(g.productId(), 1, "010-2222-3333", "이체자");
-        mvc.perform(withJson(post("/api/public/g/" + g.token() + "/orders"), o)).andExpect(status().isBadRequest());
-        o.put("recipientName", "받는분");
-        o.put("recipientPhone", "010-4444-5555");
+        mvc.perform(withJson(post("/api/public/g/" + g.token() + "/orders"), o)).andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.code").value("DELIVERY_INFO_REQUIRED"));
+        // 배송은 주소만 받는다. 수령인 이름·전화번호는 안 받음 (2026-11-10, 판매자가 입금자명·휴대폰 번호로 보냄)
         o.put("zipcode", "12345");
         o.put("address", "서울시 어딘가 1");
         o.put("addressDetail", "101호");
         mvc.perform(withJson(post("/api/public/g/" + g.token() + "/orders"), o))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.expectedAmount").value(27700))
-                .andExpect(jsonPath("$.paymentMethod").value("PREPAID"));
+                .andExpect(jsonPath("$.paymentMethod").value("PREPAID"))
+                .andExpect(jsonPath("$.finalOrder.address").value("서울시 어딘가 1"))
+                .andExpect(jsonPath("$.finalOrder.recipientName").doesNotExist());
     }
 
     @Test

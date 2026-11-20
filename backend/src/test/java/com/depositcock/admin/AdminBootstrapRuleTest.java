@@ -6,6 +6,7 @@ import com.depositcock.groupbuy.GroupBuyRepository;
 import com.depositcock.seller.Role;
 import com.depositcock.seller.Seller;
 import com.depositcock.seller.SellerRepository;
+import com.depositcock.seller.SellerService;
 import com.depositcock.vision.CaptureUsageService;
 import org.junit.jupiter.api.Test;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -23,7 +24,7 @@ import static org.mockito.Mockito.when;
 class AdminBootstrapRuleTest {
 
     private final SellerRepository sellers = mock(SellerRepository.class);
-    private final AdminService service = new AdminService(sellers, mock(GroupBuyRepository.class),
+    private final AdminService service = new AdminService(sellers, mock(SellerService.class), mock(GroupBuyRepository.class),
             mock(PasswordEncoder.class), mock(CaptureUsageService.class), Clock.systemDefaultZone());
 
     @Test

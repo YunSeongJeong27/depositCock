@@ -16,14 +16,19 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class SellerDtos {
 
-    /** 가입 (2026-11-20 아이디·휴대폰 추가). 이메일은 인증번호로 먼저 확인해야 한다 (account.AccountService) */
+    /** 가입·관리자가 계정 만들기 (2026-11-20 아이디 추가). 가입은 이메일을 인증번호로 먼저 확인해야 한다 (account.AccountService) */
     public record SignupRequest(
             @NotBlank(message = "LOGIN_ID_REQUIRED") @Size(max = 30, message = "LOGIN_ID_TOO_LONG") String loginId,
             @NotBlank(message = "PASSWORD_REQUIRED") @Size(min = 8, max = 100, message = "PASSWORD_LENGTH") String password,
             @NotBlank(message = "SELLER_NAME_REQUIRED") @Size(max = 100, message = "SELLER_NAME_TOO_LONG") String displayName,
             @NotBlank(message = "EMAIL_REQUIRED") @Email(message = "EMAIL_INVALID")
             @Size(max = 255, message = "EMAIL_TOO_LONG") String email,
-            @NotBlank(message = "PHONE_REQUIRED") @Size(max = 30, message = "PHONE_TOO_LONG") String phone) {
+            /** 휴대폰 번호 (2026-11-09, 휴대폰 인증 없이 적은 그대로) */
+            @NotBlank(message = "PHONE_REQUIRED") @Size(max = 30, message = "PHONE_INVALID") String phone) {
+    }
+
+    /** 새 회원가입을 받는지 (관리자가 끄면 false) */
+    public record SignupStatus(boolean open) {
     }
 
     public record LoginRequest(@NotBlank(message = "LOGIN_ID_REQUIRED") String loginId,
@@ -57,12 +62,14 @@ public final class SellerDtos {
             String defaultAccountHolder,
             /** 댓글 주문 기능을 쓸 수 있는지 (전체 공개 또는 판매자별 허용) */
             boolean commentFeatureEnabled,
+            /** 입금 대조 "은행앱 화면 캡처로 올리기"를 쓸 수 있는지 (관리자가 켜고 끔, 2026-11-09) */
+            boolean depositCaptureEnabled,
             /** 공구를 만든 뒤 뜨는 "제품 판매 TIP" 안내를 다시 보지 않기로 했는지 */
             boolean salesTipHidden,
             /** 알림 켜짐/꺼짐 (모든 종류, 안 정한 것은 기본값) */
             Map<NotificationType, Boolean> notifications) {
 
-        public static MeResponse of(Seller s, LocalDateTime now, boolean commentFeatureEnabled) {
+        public static MeResponse of(Seller s, LocalDateTime now, boolean commentFeatureEnabled, boolean depositCaptureEnabled) {
             return MeResponse.builder()
                     .id(s.getId())
                     .loginId(s.getLoginId())
@@ -79,6 +86,7 @@ public final class SellerDtos {
                     .defaultAccountNumber(s.getDefaultAccountNumber())
                     .defaultAccountHolder(s.getDefaultAccountHolder())
                     .commentFeatureEnabled(commentFeatureEnabled)
+                    .depositCaptureEnabled(depositCaptureEnabled)
                     .salesTipHidden(s.isSalesTipHidden())
                     .notifications(s.notificationSettings())
                     .build();

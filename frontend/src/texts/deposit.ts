@@ -1,6 +1,6 @@
 import { josa } from './common'
 
-/** 입금 대조(거래내역·스크린샷), 은행 헤더(컬럼) 설정의 긴 문장. 규칙은 common.ts 맨 위 */
+/** 입금 대조(거래내역·스크린샷), 입금 대조 은행 설정 화면의 긴 문장. 규칙은 common.ts 맨 위 */
 export const depositText = {
   // 거래내역 올리기
   uploadHelp: '은행 앱이나 인터넷뱅킹에서 거래내역을 엑셀이나 PDF로 받아 올려 주세요.',
@@ -8,7 +8,7 @@ export const depositText = {
   // 2026-10-27 사용자 요청 문구
   visibleInfoTip: '거래내역서에 계좌번호를 가리지 않는 것을 지향합니다.',
   filePasswordHelp: '암호가 걸린 PDF나 엑셀이면 올리기 전에 비밀번호를 입력하세요.',
-  bankTypeMissing: (bank: string, type: string) => `${bank} ${type} 헤더(컬럼)명이 아직 없습니다. [은행 헤더(컬럼) 설정]에서 추가해 주세요.`,
+  bankTypeMissing: (bank: string, type: string) => `${bank} ${type} 헤더(컬럼)명이 아직 없습니다. [입금 대조 은행 설정]에서 추가해 주세요.`,
   uploaded: (saved: number, duplicates: number) =>
     `입금 ${saved}건을 올렸습니다.${duplicates ? ` 이미 올린 입금 ${duplicates}건은 건너뛰었습니다.` : ''}`,
   /** headerRowNo 가 null 이면(PDF) 헤더 행 번호를 말하지 않는다 */
@@ -83,7 +83,7 @@ export const depositText = {
   visionOff: '스크린샷 글자 읽기가 아직 꺼져 있습니다. 읽은 결과 표에 직접 입력할 수 있습니다.',
   captureLimitReached: '오늘 한도를 다 썼습니다. 직접 입력해 주세요.',
 
-  // 은행 헤더(컬럼) 설정 (2026-10-27)
+  // 입금 대조 은행 설정 화면 (2026-10-27, 이름은 2026-11-09)
   bankHeadersHelp: '거래내역을 올리면 고른 은행의 헤더(컬럼)명으로 입금을 읽습니다. 같은 은행도 PDF와 엑셀은 헤더(컬럼)명이 다를 경우도 있습니다. 거래내역서와 다르면 [수정]에서 고쳐 주세요.',
   missingBank: '사용하시는 계좌의 은행이 없나요?',
   addBankHint: '목록에 있는 은행이라도 없는 파일 종류는 여기서 추가합니다.',
