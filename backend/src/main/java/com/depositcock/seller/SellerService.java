@@ -8,6 +8,7 @@ import java.util.Map;
 import com.depositcock.common.ApiException;
 import com.depositcock.common.AppProperties;
 import com.depositcock.common.ErrorCode;
+import com.depositcock.common.PhoneNumbers;
 import com.depositcock.common.Texts;
 import com.depositcock.seller.SellerDtos.SignupRequest;
 import com.depositcock.seller.SellerDtos.UpdateProfileRequest;
@@ -26,20 +27,36 @@ public class SellerService {
     private final AppProperties properties;
     private final Clock clock;
 
+    /**
+     * 판매자 만들기. 이메일 인증 확인은 부르는 쪽(account.AccountService.signup)이 같은 트랜잭션에서 한다.
+     * 아이디·휴대폰·중복 검사를 여기서 먼저 해서 잘못된 가입이 이메일 인증을 써 버리지 않게 한다.
+     */
     @Transactional
     public Seller signup(SignupRequest request) {
+        String loginId = LoginIds.normalize(request.loginId());
+        if (loginId == null) {
+            throw new ApiException(ErrorCode.LOGIN_ID_INVALID);
+        }
+        String phone = PhoneNumbers.normalize(request.phone());
+        if (phone == null) {
+            throw new ApiException(ErrorCode.PHONE_INVALID);
+        }
         String email = normalizeEmail(request.email());
+        if (sellerRepository.existsByLoginId(loginId)) {
+            throw new ApiException(ErrorCode.LOGIN_ID_TAKEN);
+        }
         if (sellerRepository.existsByEmail(email)) {
             throw new ApiException(ErrorCode.EMAIL_TAKEN);
         }
         LocalDateTime now = LocalDateTime.now(clock);
-        Seller seller = new Seller(email, passwordEncoder.encode(request.password()), request.displayName().trim(),
-                Role.SELLER, now, now.plusDays(properties.trialDays()));
+        Seller seller = new Seller(loginId, email, phone, passwordEncoder.encode(request.password()),
+                request.displayName().trim(), Role.SELLER, now, now.plusDays(properties.trialDays()));
         return sellerRepository.save(seller);
     }
 
-    public Seller login(String email, String password) {
-        Seller seller = sellerRepository.findByEmail(normalizeEmail(email))
+    /** 아이디로 로그인 (2026-11-20, 전에는 이메일). 대문자로 적어도 된다 */
+    public Seller login(String loginId, String password) {
+        Seller seller = sellerRepository.findByLoginId(loginId.trim().toLowerCase(Locale.ROOT))
                 .orElseThrow(() -> new ApiException(ErrorCode.LOGIN_FAILED));
         if (!passwordEncoder.matches(password, seller.getPasswordHash())) {
             throw new ApiException(ErrorCode.LOGIN_FAILED);
@@ -55,6 +72,11 @@ public class SellerService {
     @Transactional
     public Seller updateProfile(Long sellerId, UpdateProfileRequest request) {
         Seller seller = get(sellerId);
+        String phone = PhoneNumbers.normalize(request.phone());
+        if (phone == null) {
+            throw new ApiException(ErrorCode.PHONE_INVALID);
+        }
+        seller.setPhone(phone);
         seller.setDisplayName(request.displayName().trim());
         seller.setDefaultBankName(Texts.blankToNull(request.defaultBankName()));
         seller.setDefaultAccountNumber(Texts.blankToNull(request.defaultAccountNumber()));

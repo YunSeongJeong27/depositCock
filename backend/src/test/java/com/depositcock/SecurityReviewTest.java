@@ -44,13 +44,13 @@ class SecurityReviewTest extends IntegrationTest {
         MockMvc raw = MockMvcBuilders.webAppContextSetup(context)
                 .addFilters(context.getBean(CsrfHeaderFilter.class))
                 .apply(springSecurity()).build();
-        raw.perform(post("/api/auth/signup").contentType(MediaType.APPLICATION_JSON)
-                        .content(json(Map.of("email", uniqueEmail(), "password", "password123", "displayName", "x"))))
+        raw.perform(post("/api/auth/signup/email-code").contentType(MediaType.APPLICATION_JSON)
+                        .content(json(Map.of("email", uniqueEmail()))))
                 .andExpect(status().isForbidden())
                 .andExpect(jsonPath("$.code").value("CSRF_REJECTED"));
-        raw.perform(post("/api/auth/signup").header(CsrfHeaderFilter.HEADER, "depositcock")
+        raw.perform(post("/api/auth/signup/email-code").header(CsrfHeaderFilter.HEADER, "depositcock")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(json(Map.of("email", uniqueEmail(), "password", "password123", "displayName", "x"))))
+                        .content(json(Map.of("email", uniqueEmail()))))
                 .andExpect(status().isOk());
         // 읽기 요청은 헤더 없이도 된다 (다운로드 링크 등)
         raw.perform(get("/api/public/g/없는토큰")).andExpect(status().isNotFound());
@@ -146,14 +146,16 @@ class SecurityReviewTest extends IntegrationTest {
                 .andExpect(status().isOk());
     }
 
-    /** 관리자 이메일로 일반 판매자가 먼저 가입해 있으면 관리자로 바꾸지 않는다 */
+    /** 관리자 이메일·아이디를 일반 판매자가 먼저 쓰고 있으면 관리자로 바꾸지 않는다 */
     @Test
     void adminBootstrapDoesNotPromoteExistingSeller() throws Exception {
         String email = uniqueEmail();
         signup(email);
-        assertThat(adminService.ensureAdmin(email, "whatever123")).isFalse();
+        assertThat(adminService.ensureAdmin("newadmin", email, "whatever123")).isFalse();
+        // 아이디를 일반 판매자가 이미 쓰고 있어도 만들지 않는다
+        assertThat(adminService.ensureAdmin(loginIdOf(email), uniqueEmail(), "whatever123")).isFalse();
         Cookie cookie = login(email, "password123");
         mvc.perform(get("/api/admin/sellers").cookie(cookie)).andExpect(status().isForbidden());
-        assertThat(adminService.ensureAdmin("admin@test.local", "admin1234")).isTrue();
+        assertThat(adminService.ensureAdmin("admin", "admin@test.local", "admin1234")).isTrue();
     }
 }

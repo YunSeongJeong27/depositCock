@@ -136,7 +136,7 @@ class RowTimestampsTest extends IntegrationTest {
 
         // 판매자 정보 수정 → 수정 일시만 바뀜
         tick();
-        mvc.perform(withJson(put("/api/seller/profile").cookie(seller), Map.of("displayName", "이름 바꿈")))
+        mvc.perform(withJson(put("/api/seller/profile").cookie(seller), Map.of("displayName", "이름 바꿈", "phone", "010-1234-5678")))
                 .andExpect(status().isOk());
         Stamps edited = stamps("seller where id = ?", sellerId);
         assertThat(edited.created()).isEqualTo(signedUp.created());

@@ -5,6 +5,8 @@ import java.util.List;
 import java.time.Clock;
 import java.time.LocalDateTime;
 
+import com.depositcock.admin.AdminDtos.AdminLoginIdRequest;
+import com.depositcock.admin.AdminDtos.AdminPasswordRequest;
 import com.depositcock.admin.AdminDtos.AdminSellerRow;
 import com.depositcock.admin.AdminDtos.AdminSettings;
 import com.depositcock.admin.AdminDtos.AdminUpdateRequest;
@@ -19,7 +21,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
- * 슈퍼 관리자(윤성) 전용: 판매자 목록, 플랜·유료 만료일·사용 제한·댓글 기능 허용 변경, 탈퇴 처리, 서비스 전체 설정.
+ * 슈퍼 관리자(윤성) 전용: 판매자 목록, 플랜·유료 만료일·사용 제한·댓글 기능 허용 변경, 아이디·비밀번호 변경, 탈퇴 처리,
+ * 서비스 전체 설정.
  */
 @RestController
 @RequiredArgsConstructor
@@ -49,6 +52,18 @@ public class AdminController {
     @PutMapping("/api/admin/sellers/{sellerId}")
     public void update(@PathVariable Long sellerId, @Valid @RequestBody AdminUpdateRequest request) {
         adminService.updateSeller(sellerId, request);
+    }
+
+    /** 아이디 바꾸기 (2026-11-20) */
+    @PutMapping("/api/admin/sellers/{sellerId}/login-id")
+    public void changeLoginId(@PathVariable Long sellerId, @Valid @RequestBody AdminLoginIdRequest request) {
+        adminService.changeLoginId(sellerId, request.loginId());
+    }
+
+    /** 비밀번호 새로 정하기 (2026-11-20). 지금 비밀번호는 해시로만 저장돼 보여 줄 수 없다 */
+    @PutMapping("/api/admin/sellers/{sellerId}/password")
+    public void changePassword(@PathVariable Long sellerId, @Valid @RequestBody AdminPasswordRequest request) {
+        adminService.changePassword(sellerId, request.password());
     }
 
     @DeleteMapping("/api/admin/sellers/{sellerId}")

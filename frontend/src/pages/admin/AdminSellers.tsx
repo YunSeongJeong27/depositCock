@@ -6,7 +6,11 @@ import type { Plan, Role } from '../../types'
 
 interface Row {
   id: number
+  /** 로그인 아이디 (2026-11-20) */
+  loginId: string
   email: string
+  /** 010-1234-5678 모양 (없으면 null) */
+  phone: string | null
   displayName: string
   role: Role
   plan: Plan
@@ -31,7 +35,84 @@ const emailWithBreak = (email: string) => {
   return at > 0 ? <>{email.slice(0, at)}<wbr />{email.slice(at)}</> : email
 }
 
-/** 슈퍼 관리자: 판매자 목록, 플랜(무료 체험/유료)·유료 만료일·사용 제한 수동 변경 */
+/**
+ * 판매자 상세 창 (2026-11-20): 아이디·이메일·휴대폰을 보고 아이디·비밀번호를 바꾼다.
+ * 비밀번호는 일방향 해시로만 저장해서 지금 값은 보여 줄 수 없고, 새 비밀번호를 정하는 것만 된다
+ */
+function SellerDetail({ row, onClose, onChanged }: { row: Row; onClose: () => void; onChanged: () => void }) {
+  const [loginId, setLoginId] = useState(row.loginId)
+  const [password, setPassword] = useState('')
+  const [message, setMessage] = useState<string | null>(null)
+  const [error, setError] = useState<string | null>(null)
+  const [busy, setBusy] = useState(false)
+
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose() }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [onClose])
+
+  async function run(confirmText: string, action: () => Promise<unknown>, done: string) {
+    if (!confirm(confirmText)) return
+    setBusy(true)
+    setError(null)
+    setMessage(null)
+    try {
+      await action()
+      setMessage(done)
+      onChanged()
+    } catch (e) {
+      setError(errorMessage(e))
+    } finally {
+      setBusy(false)
+    }
+  }
+
+  const changeLoginId = () => run(T.confirmAdminLoginId(row.loginId, loginId.trim()),
+    () => api.put(`/api/admin/sellers/${row.id}/login-id`, { loginId }), T.adminLoginIdChanged)
+  const changePassword = () => run(T.confirmAdminPassword(loginId.trim() || row.loginId),
+    async () => {
+      await api.put(`/api/admin/sellers/${row.id}/password`, { password })
+      setPassword('')
+    }, T.adminPasswordChanged)
+
+  return (
+    <div className="modal-backdrop" onClick={onClose}>
+      <div className="modal modal-wide" role="dialog" aria-modal="true" aria-labelledby="seller-detail-title" onClick={(e) => e.stopPropagation()}>
+        <h3 id="seller-detail-title">{row.displayName} 상세</h3>
+        <table className="detail-table">
+          <tbody>
+            <tr><th>아이디</th><td>{row.loginId}</td></tr>
+            <tr><th>이메일</th><td>{emailWithBreak(row.email)}</td></tr>
+            <tr><th>휴대폰</th><td>{row.phone ?? '없음'}</td></tr>
+            <tr><th>비밀번호</th><td className="muted small">{T.adminPasswordNote}</td></tr>
+            <tr><th>구분</th><td>{row.role === 'ADMIN' ? '관리자' : '판매자'} · 가입 {row.createdAt.substring(0, 10)} · 공구 {row.groupBuyCount}개</td></tr>
+          </tbody>
+        </table>
+        <h4>아이디 변경</h4>
+        <div className="row">
+          <input type="text" value={loginId} onChange={(e) => setLoginId(e.target.value)} aria-label="새 아이디" autoCapitalize="none" style={{ flex: 1, minWidth: 160 }} />
+          <button type="button" className="btn" disabled={busy || !loginId.trim() || loginId.trim() === row.loginId} onClick={changeLoginId}>아이디 변경</button>
+        </div>
+        <div className="muted small">{T.loginIdHint}</div>
+        <h4>비밀번호 변경</h4>
+        <div className="row">
+          <input type="text" value={password} onChange={(e) => setPassword(e.target.value)} aria-label="새 비밀번호" placeholder="새 비밀번호 (8자 이상)"
+            autoComplete="off" style={{ flex: 1, minWidth: 160 }} />
+          <button type="button" className="btn" disabled={busy || password.length < 8} onClick={changePassword}>비밀번호 변경</button>
+        </div>
+        {message && <div className="success-box">{message}</div>}
+        <ErrorBox message={error} />
+        <div className="row between modal-foot">
+          <span />
+          <button type="button" className="btn primary" onClick={onClose}>닫기</button>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+/** 슈퍼 관리자: 판매자 목록, 플랜(무료 체험/유료)·유료 만료일·사용 제한 수동 변경, 상세(아이디·비밀번호 변경) */
 export default function AdminSellers() {
   const [rows, setRows] = useState<Row[]>([])
   const [editing, setEditing] = useState<Record<number, Row>>({})
@@ -39,6 +120,8 @@ export default function AdminSellers() {
   const [filter, setFilter] = useState<'all' | 'expired' | 'suspended'>('all')
   /** 댓글 주문 기능 전체 공개 (꺼져 있으면 아래에서 허용한 판매자만 씀) */
   const [commentOpen, setCommentOpen] = useState<boolean | null>(null)
+  /** 상세 창을 연 판매자 id */
+  const [detailId, setDetailId] = useState<number | null>(null)
 
   const load = () => api.get<Row[]>('/api/admin/sellers').then(setRows).catch((e) => setError(errorMessage(e)))
   useEffect(() => {
@@ -89,6 +172,7 @@ export default function AdminSellers() {
   }
 
   const shown = rows.filter((r) => filter === 'all' || (filter === 'expired' ? r.expired : r.suspended))
+  const detailRow = rows.find((r) => r.id === detailId)
 
   return (
     <div>
@@ -132,7 +216,7 @@ export default function AdminSellers() {
               const update = (patch: Partial<Row>) => setEditing((e) => ({ ...e, [row.id]: { ...r, ...patch } }))
               return (
                 <tr key={row.id}>
-                  <td className="stack-title">{row.displayName}<div className="muted small">{emailWithBreak(row.email)}{row.role === 'ADMIN' && ' · 관리자'}</div>
+                  <td className="stack-title">{row.displayName}<div className="muted small">{row.loginId} · {emailWithBreak(row.email)}{row.role === 'ADMIN' && ' · 관리자'}</div>
                     <div className="muted small">가입 {row.createdAt.substring(0, 10)} · 공구 {row.groupBuyCount}개</div></td>
                   <td data-label="플랜">
                     <select value={r.plan} onChange={(e) => update({ plan: e.target.value as Plan })} disabled={row.role === 'ADMIN'} style={{ minWidth: 120 }}>
@@ -168,6 +252,7 @@ export default function AdminSellers() {
                   </td>
                   <td data-label="메모"><input type="text" value={r.adminMemo ?? ''} onChange={(e) => update({ adminMemo: e.target.value })} placeholder="입금 기록 등" style={{ minWidth: 120 }} /></td>
                   <td className="stack-action">
+                    <button className="btn small" onClick={() => setDetailId(row.id)}>상세</button>
                     {isEditing && <button className="btn small primary" onClick={() => save(r)}>저장</button>}
                     {row.role !== 'ADMIN' && <button className="btn small danger" onClick={() => remove(row)}>탈퇴</button>}
                   </td>
@@ -177,6 +262,7 @@ export default function AdminSellers() {
           </tbody>
         </table>
       </div>
+      {detailRow && <SellerDetail key={detailRow.id} row={detailRow} onClose={() => setDetailId(null)} onChanged={load} />}
     </div>
   )
 }

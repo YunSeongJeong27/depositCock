@@ -1,12 +1,12 @@
 -- 로컬(맥북) 전용 샘플 데이터. application-local.yml 에서만 이 폴더(db/local)를 읽는다. 운영 DB 에는 실행하지 않는다.
--- 데모 판매자: demo@depositcock.local / demo1234
+-- 데모 판매자: 아이디 demo / 비밀번호 demo1234 (이메일 demo@depositcock.local, 휴대폰 010-0000-0001)
 -- 고객 주문서 링크: http://localhost:8080/g/demo-paprika (프론트 개발 서버면 http://localhost:5173/g/demo-paprika)
 -- 댓글 집계 시험용: "사과 1박스 (댓글 주문 데모)" 공구 (상품이 1개라 댓글 주문 가능. 상품이 여러 개면 댓글 주문을 막음)
 
 -- 데모 판매자는 댓글 주문 기능을 허용해 둔다 (실제 판매자는 관리자가 열어 줘야 함)
-INSERT INTO seller (email, password_hash, display_name, role, plan, trial_ends_at, suspended,
+INSERT INTO seller (login_id, email, phone, password_hash, display_name, role, plan, trial_ends_at, suspended,
                     default_bank_name, default_account_number, default_account_holder, comment_feature_enabled, created_at)
-VALUES ('demo@depositcock.local', '$2a$10$h/xuNp.ucRhLGho7oisjGuhm1AMSHuTIui2pK6SC6kb5JbDWS9yUy', '공구하는 데모', 'SELLER',
+VALUES ('demo', 'demo@depositcock.local', '01000000001', '$2a$10$h/xuNp.ucRhLGho7oisjGuhm1AMSHuTIui2pK6SC6kb5JbDWS9yUy', '공구하는 데모', 'SELLER',
         'TRIAL', TIMESTAMP '2099-12-31 23:59:59', FALSE, '토스뱅크', '1000-0000-0000', '데모', TRUE, CURRENT_TIMESTAMP);
 
 INSERT INTO group_buy (seller_id, title, description, public_token, status, close_at, bank_name, account_number,

@@ -15,6 +15,10 @@ public interface SellerRepository extends JpaRepository<Seller, Long> {
 
     boolean existsByEmail(String email);
 
+    Optional<Seller> findByLoginId(String loginId);
+
+    boolean existsByLoginId(String loginId);
+
     List<Seller> findAllByOrderByIdDesc();
 
     @Lock(LockModeType.PESSIMISTIC_WRITE)

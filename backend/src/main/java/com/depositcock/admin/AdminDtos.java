@@ -7,6 +7,7 @@ import com.depositcock.seller.Plan;
 import com.depositcock.seller.Role;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.AccessLevel;
@@ -19,7 +20,10 @@ public final class AdminDtos {
     @Builder
     public record AdminSellerRow(
             Long id,
+            String loginId,
             String email,
+            /** 010-1234-5678 모양 (없으면 null) */
+            String phone,
             String displayName,
             Role role,
             Plan plan,
@@ -49,6 +53,16 @@ public final class AdminDtos {
             @Max(value = 10000, message = "CAPTURE_LIMIT_RANGE") Integer dailyCaptureLimit,
             /** 판매자별 댓글 주문 기능 허용. null 이면 그대로 둔다 */
             Boolean commentFeatureEnabled) {
+    }
+
+    /** 관리자가 아이디 바꾸기 (2026-11-20) */
+    public record AdminLoginIdRequest(
+            @NotBlank(message = "LOGIN_ID_REQUIRED") @Size(max = 30, message = "LOGIN_ID_TOO_LONG") String loginId) {
+    }
+
+    /** 관리자가 비밀번호 새로 정하기 (2026-11-20) */
+    public record AdminPasswordRequest(
+            @NotBlank(message = "PASSWORD_REQUIRED") @Size(min = 8, max = 100, message = "PASSWORD_LENGTH") String password) {
     }
 
     /** 서비스 전체 설정 (관리자) */

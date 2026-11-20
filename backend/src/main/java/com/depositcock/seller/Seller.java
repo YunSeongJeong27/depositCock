@@ -35,9 +35,19 @@ public class Seller extends BaseTimeEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    /** 로그인 아이디 (2026-11-20, 소문자). 관리자가 바꿀 수 있다 */
+    @Setter
+    @Column(nullable = false, unique = true)
+    private String loginId;
+
     @Column(nullable = false, unique = true)
     private String email;
 
+    /** 휴대폰 번호 (숫자만). 아이디·비밀번호 찾기에 쓴다. 환경변수로 만든 관리자 계정은 null 일 수 있다 */
+    @Setter
+    private String phone;
+
+    @Setter
     @Column(nullable = false)
     private String passwordHash;
 
@@ -103,9 +113,11 @@ public class Seller extends BaseTimeEntity {
     @Getter(AccessLevel.NONE)
     private Map<NotificationType, SellerNotification> notifications = new HashMap<>();
 
-    public Seller(String email, String passwordHash, String displayName, Role role,
+    public Seller(String loginId, String email, String phone, String passwordHash, String displayName, Role role,
                   LocalDateTime createdAt, LocalDateTime trialEndsAt) {
+        this.loginId = loginId;
         this.email = email;
+        this.phone = phone;
         this.passwordHash = passwordHash;
         this.displayName = displayName;
         this.role = role;

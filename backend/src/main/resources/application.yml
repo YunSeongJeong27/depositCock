@@ -48,7 +48,8 @@ app:
   data-key: ${APP_DATA_KEY:}
   cookie-secure: false
   trial-days: 30
-  # 최초 관리자 계정. 비어 있으면 만들지 않는다.
+  # 최초 관리자 계정. 이메일·비밀번호가 비어 있으면 만들지 않는다. 아이디는 기본 admin (2026-11-20)
+  admin-login-id: ${APP_ADMIN_LOGIN_ID:admin}
   admin-email: ${APP_ADMIN_EMAIL:}
   admin-password: ${APP_ADMIN_PASSWORD:}
   # 공개 주문 API: IP 하나당 1분에 허용하는 요청 수
@@ -58,6 +59,8 @@ app:
   # 메일 보내는 사람 (비우면 SPRING_MAIL_USERNAME), 메일 속 링크용 서비스 주소 (예: https://입금콕.kr)
   mail-from: ${APP_MAIL_FROM:}
   public-base-url: ${APP_PUBLIC_BASE_URL:}
+  # 메일 설정이 없을 때 인증번호·아이디·임시 비밀번호 메일을 로그로만 남길지 (내 맥북 로컬 실행용, 운영은 false)
+  mail-dev-log: false
   vision:
     # fake | anthropic
     provider: ${APP_VISION_PROVIDER:fake}

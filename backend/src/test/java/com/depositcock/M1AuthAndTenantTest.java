@@ -28,7 +28,9 @@ class M1AuthAndTenantTest extends IntegrationTest {
         Cookie token = login(email, "password123");
         mvc.perform(get("/api/me").cookie(token))
                 .andExpect(status().isOk())
+                .andExpect(jsonPath("$.loginId").value(loginIdOf(email)))
                 .andExpect(jsonPath("$.email").value(email))
+                .andExpect(jsonPath("$.phone").value("010-1234-5678"))
                 .andExpect(jsonPath("$.plan").value("TRIAL"))
                 .andExpect(jsonPath("$.expired").value(false));
     }
@@ -37,19 +39,27 @@ class M1AuthAndTenantTest extends IntegrationTest {
     void wrongPasswordAndNoToken() throws Exception {
         String email = uniqueEmail();
         signup(email);
-        mvc.perform(withJson(post("/api/auth/login"), Map.of("email", email, "password", "wrong-password")))
+        mvc.perform(withJson(post("/api/auth/login"), Map.of("loginId", loginIdOf(email), "password", "wrong-password")))
                 .andExpect(status().isUnauthorized());
         mvc.perform(get("/api/me")).andExpect(status().isUnauthorized());
         mvc.perform(get("/api/seller/group-buys")).andExpect(status().isUnauthorized());
     }
 
     @Test
-    void duplicateEmailRejected() throws Exception {
+    void duplicateEmailAndLoginIdRejected() throws Exception {
         String email = uniqueEmail();
         signup(email);
-        mvc.perform(withJson(post("/api/auth/signup"),
-                        Map.of("email", email.toUpperCase(), "password", "password123", "displayName", "x")))
-                .andExpect(status().isConflict());
+        // 이미 가입된 이메일은 인증번호부터 막는다 (대문자로 적어도 같은 이메일)
+        mvc.perform(withJson(post("/api/auth/signup/email-code"), Map.of("email", email.toUpperCase())))
+                .andExpect(status().isConflict())
+                .andExpect(jsonPath("$.code").value("EMAIL_TAKEN"));
+        // 같은 아이디 (대문자로 적어도 같은 아이디)
+        String other = uniqueEmail();
+        verifySignupEmail(other);
+        mvc.perform(withJson(post("/api/auth/signup"), Map.of("loginId", loginIdOf(email).toUpperCase(),
+                        "password", "password123", "displayName", "x", "email", other, "phone", "010-1111-2222")))
+                .andExpect(status().isConflict())
+                .andExpect(jsonPath("$.code").value("LOGIN_ID_TAKEN"));
     }
 
     @Test
@@ -126,7 +136,7 @@ class M1AuthAndTenantTest extends IntegrationTest {
                 .andExpect(status().isBadRequest());
         mvc.perform(withJson(post("/api/seller/withdraw").cookie(seller), Map.of("password", "password123")))
                 .andExpect(status().isOk());
-        mvc.perform(withJson(post("/api/auth/login"), Map.of("email", email, "password", "password123")))
+        mvc.perform(withJson(post("/api/auth/login"), Map.of("loginId", loginIdOf(email), "password", "password123")))
                 .andExpect(status().isUnauthorized());
     }
 }
